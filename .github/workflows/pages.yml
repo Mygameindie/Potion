@@ -9,10 +9,7 @@ name: Deploy game to GitHub Pages
 
 on:
   push:
-    branches: [main]
-    paths:
-      - "Main/**"
-      - ".github/workflows/pages.yml"
+    branches: [main, claude/zip-extract-organize-ediwt4]
   workflow_dispatch:
 
 permissions:
@@ -37,6 +34,9 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          # Auto-enable Pages (build_type: workflow) so no manual Settings step is needed.
+          enablement: true
 
       - name: Upload site (Main/ as the site root)
         uses: actions/upload-pages-artifact@v3
