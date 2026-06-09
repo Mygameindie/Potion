@@ -1,0 +1,424 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PoE – UI Mockup</title>
+  <meta name="theme-color" content="#0b0b0f" />
+  <meta name="color-scheme" content="dark light" />
+  <style>
+    :root{
+      --bg:#0b0b10; --panel:#11131a; --panel-2:#0e1016; --text:#e7ebf4; --muted:#9aa3b2;
+      --accent:#8b9dff; --accent-2:#61d1c2; --danger:#f56b6b; --ok:#86e49d; --border:#1c2030;
+      --radius:16px; --radius-sm:12px; --gap:14px; --shadow:0 8px 28px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#08090d 60%);color:var(--text);font:16px/1.5 system-ui,Segoe UI,Roboto,Arial}
+    a{color:var(--accent)}
+    .wrap{max-width:1000px;margin:0 auto;padding:20px}header.top{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:14px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;backdrop-filter:saturate(1.1) blur(6px);
+  background:linear-gradient(180deg,rgba(11,11,16,.9),rgba(11,11,16,.6));z-index:20
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .logo{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff3,transparent 60%),linear-gradient(135deg,var(--accent),#b38bff)}
+.brand h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.3px}
+
+nav.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab-btn{padding:10px 14px;background:var(--panel);border:1px solid var(--border);border-radius:999px;color:var(--text);cursor:pointer}
+.tab-btn[aria-selected="true"]{background:linear-gradient(180deg,var(--panel),var(--panel-2));border-color:#2a3045;box-shadow:inset 0 0 0 1px #2e3550}
+
+main{padding:18px 0}
+.panel{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+
+/* Brew layout */
+.brew-grid{display:grid;grid-template-columns:260px 1fr;gap:18px}
+@media (max-width:860px){.brew-grid{grid-template-columns:1fr}}
+
+.card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px}
+.title{font-size:14px;color:var(--muted);margin:0 0 8px 0;text-transform:uppercase;letter-spacing:.12em}
+
+.form-box{display:flex;flex-direction:column;align-items:center;gap:10px}
+.form-img{width:100%;max-width:220px;aspect-ratio:1/1;border-radius:14px;border:1px solid var(--border);background:
+  radial-gradient(circle at 60% 20%, #ffffff10 0 40%, transparent 60%),
+  linear-gradient(135deg,#2c2f48,#1a1d2b);display:grid;place-items:center;color:#9aa3b2;font-weight:600}
+.form-name{font-weight:700;letter-spacing:.4px}
+
+.brew-box{display:flex;flex-direction:column;gap:12px}
+.input-row{display:flex;gap:10px}
+.input-row input{flex:1;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:#0a0d14;color:var(--text)}
+.btn{padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:#0d1119;color:var(--text);cursor:pointer}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.primary{background:linear-gradient(180deg,#151a26,#121624);border-color:#29304a}
+.btn.ok{background:linear-gradient(180deg,#142219,#101a14);border-color:#244a39}
+
+.log-box{height:220px;overflow:auto;border-radius:10px;border:1px solid var(--border);background:#0a0d14;padding:10px}
+.log-line{display:flex;gap:8px;align-items:flex-start}
+.log-time{color:var(--muted);font-size:12px;min-width:64px}
+.chip{display:inline-flex;gap:6px;align-items:center;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:#10131c;color:var(--muted)}
+
+/* Codex */
+.codex-tabs{display:flex;gap:8px;margin-bottom:10px}
+.codex-btn{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#0e1118;color:var(--text);cursor:pointer}
+.codex-btn[aria-selected="true"]{background:#131827}
+.codex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.codex-card{border:1px solid var(--border);border-radius:12px;background:#0b0f17;padding:12px}
+.codex-card .name{font-weight:700;margin-bottom:4px}
+.muted{color:var(--muted)}
+
+/* Settings */
+.settings-list{display:flex;flex-direction:column;gap:12px}
+.danger{background:linear-gradient(180deg,#2a1010,#1a0c0c);border-color:#492323}
+footer{opacity:.7;margin-top:20px;font-size:12px}
+
+/* Mobile sticky bar */
+.sticky-bar{position:sticky;bottom:0;display:flex;gap:10px;padding:10px;background:linear-gradient(180deg,transparent,rgba(8,9,13,.8));backdrop-filter:blur(8px)}
+
+/* center container a bit tighter */
+.wrap{max-width:920px;margin:0 auto;padding:20px;display:block}
+
+/* hide top tabs (we moved them to bottom) */
+nav.tabs{display:none}
+
+/* remove old brew/drink sticky bar */
+.sticky-bar{display:none}
+
+/* bottom tabs */
+.bottom-tabs{
+  position:sticky; bottom:0; z-index:30;
+  display:flex; justify-content:center; gap:10px;
+  padding:10px 14px; border-top:1px solid var(--border);
+  background:linear-gradient(180deg,rgba(8,9,13,.4),rgba(8,9,13,.9));
+  backdrop-filter:blur(10px);
+}
+.bottom-tabs .tab-btn{
+  padding:12px 16px; border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--panel); color:var(--text);
+}
+.bottom-tabs .tab-btn[aria-selected="true"]{
+  background:linear-gradient(180deg,var(--panel),var(--panel-2));
+  border-color:#2a3045; box-shadow:inset 0 0 0 1px #2e3550;
+}
+
+/* ===== Keywords panel ===== */
+.kw-head{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.kw-selected{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border:1px solid var(--border);background:#0b0f17;border-radius:12px;padding:12px}
+.kw-title{font-weight:800;letter-spacing:.3px}
+.kw-tags{display:flex;gap:6px;flex-wrap:wrap}
+.kw-tag{font-size:11px;padding:2px 8px;border:1px solid var(--border);border-radius:999px;background:#0f1420;color:var(--muted)}
+.kw-actions{margin-left:auto;display:flex;gap:8px}
+.kw-actions .btn{padding:8px 12px;border-radius:10px}
+
+.kw-az{display:flex;flex-wrap:wrap;gap:6px}
+.kw-az .az-btn{padding:6px 10px;font-size:12px;border-radius:999px;border:1px solid var(--border);background:#0e1118;color:var(--text);cursor:pointer}
+.kw-az .az-btn[aria-pressed="true"]{background:#131827}
+
+.kw-list{border:1px solid var(--border);background:#0a0d14;border-radius:12px;height:360px;overflow:auto}
+.kw-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #0f1220;cursor:pointer}
+.kw-item:last-child{border-bottom:0}
+.kw-item:hover{background:#0f1420}
+.kw-item .name{font-weight:600}
+.kw-item .id{color:var(--muted);font-size:12px}
+.kw-item .mini-tags{display:flex;gap:6px}
+.kw-item .mini-tags .kw-tag{transform:scale(.9)}
+
+.overlay-lite{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:60}
+.overlay-lite.active{display:flex}
+.overlay-card{background:#0b0f17;border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;max-width:520px;width:92%;display:flex;flex-direction:column;gap:12px;align-items:center}
+.overlay-img{width:280px;max-width:80%;aspect-ratio:1/1;border:1px solid var(--border);border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#2c2f48,#1a1d2b);color:#aab2c5;font-weight:700}
+
+  </style>
+</head>
+<body>
+  <header class="top" role="banner">
+  <div class="brand">
+    <div class="logo" aria-hidden="true"></div>
+    <h1>PoE – Mockup</h1>
+  </div>
+</header>
+    <nav class="tabs" role="tablist" aria-label="Main Tabs">
+      <button class="tab-btn" role="tab" aria-selected="true" data-tab="brew">Brew</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="codex">Codex</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="settings">Settings</button>
+    </nav>
+  </header>  <main class="wrap">
+    <!-- BREW -->
+    <section id="tab-brew" class="panel" role="tabpanel" aria-labelledby="tab-brew-btn">
+      <div class="brew-grid">
+        <div class="card">
+          <p class="title">Current Form</p>
+          <div class="form-box">
+            <div class="form-img" id="formImg">IMG</div>
+            <div class="form-name" id="formName">human</div>
+          </div>
+        </div>
+        <div class="brew-box">
+          <div class="card">
+            <p class="title">Brew</p>
+            <div class="input-row">
+              <input id="input" placeholder="Type any word… e.g. flame, death, moon" autocomplete="off" />
+              <button class="btn primary" id="btnBrew">Brew</button>
+              <button class="btn ok" id="btnDrink" disabled>Drink</button>
+            </div>
+          </div>
+          <div class="card">
+            <p class="title">Log</p>
+            <div class="log-box" id="log" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </section><!-- CODEX -->
+<section id="tab-codex" class="panel" role="tabpanel" hidden>
+  <div class="codex-tabs" role="tablist" aria-label="Codex Tabs">
+    <button class="codex-btn" role="tab" aria-selected="true" data-sub="kw">Keywords</button>
+    <button class="codex-btn" role="tab" aria-selected="false" data-sub="forms">Forms</button>
+    <button class="codex-btn" role="tab" aria-selected="false" data-sub="endings">Endings</button>
+  </div>
+
+  <!-- แสดงเนื้อหา Codex ทั้งหมดที่ถูก re-render -->
+  <div id="codex-content"></div>
+</section>
+
+<!-- ย้าย overlay ออกมานอก #codex-content (วางไว้ก่อน </body>) -->
+<div id="kwOverlay" class="overlay-lite" aria-modal="true" role="dialog">
+  <div class="overlay-card">
+    <div id="kwOverlayImg" class="overlay-img">PREVIEW</div>
+    <div id="kwOverlayName" class="form-name">preview</div>
+    <button class="btn" id="kwOverlayClose">Close</button>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<section id="tab-settings" class="panel" role="tabpanel" hidden>
+  <div class="settings-list">
+    <div class="card danger">
+      <p class="title">Danger Zone</p>
+      <button class="btn danger" id="btnClearSave"> Hard Reset (mock) </button>
+    </div>
+    <div class="card">
+      <p class="title">Credits</p>
+      <div class="muted">Potion of Everything — Mock UI by you ✨</div>
+    </div>
+  </div>
+  <footer class="muted">This is a visual mockup for layout testing only. No game logic attached.</footer>
+</section>
+
+  </main> 
+<!-- Bottom Tabs (replaces mobile Brew/Drink bar) -->
+<nav class="bottom-tabs" role="tablist" aria-label="Main Tabs (Bottom)">
+  <button class="tab-btn" role="tab" aria-selected="true" data-tab="brew">Brew</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-tab="codex">Codex</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-tab="settings">Settings</button>
+</nav>
+<script>
+  // ======= tiny helpers (mock only) =======
+const $  = (s,root=document)=>root.querySelector(s);
+const $$ = (s,root=document)=>[...root.querySelectorAll(s)];
+
+// รวมทุกปุ่มแท็บที่มี data-tab ไม่ว่าจะอยู่บนหรือล่าง
+const TAB_BTNS = $$('.tab-btn[data-tab], .bottom-tabs .tab-btn[data-tab]');
+
+// bind คลิกให้ทุกปุ่ม
+TAB_BTNS.forEach(btn=>{
+  btn.addEventListener('click', ()=>selectTab(btn.dataset.tab));
+});
+
+function selectTab(name){
+  // อัปเดต aria-selected ให้ปุ่มทุกชุด (บน/ล่าง ถ้ามี)
+  TAB_BTNS.forEach(b=>b.setAttribute('aria-selected', b.dataset.tab===name));
+
+  // สลับเนื้อหาแท็บ
+  ['brew','codex','settings'].forEach(id=>{
+    const el = $('#tab-'+id); if (!el) return;
+    el.hidden = (id !== name);
+  });
+
+  // โฟกัสช่องพิมพ์เมื่อเข้าหน้า Brew
+  if (name === 'brew') $('#input')?.focus();
+}
+
+// ตั้งต้นที่ Brew เสมอ
+selectTab('brew');
+
+  // Brew/Drink mock behavior
+  function now(){
+    const d = new Date();
+    return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  }
+  function log(type, text){
+    const line = document.createElement('div'); line.className='log-line';
+    line.innerHTML = `<span class="log-time">${now()}</span><span class="chip">${type}</span><span>${escapeHtml(text)}</span>`;
+    const box = $('#log'); box.appendChild(line); box.scrollTop = box.scrollHeight;
+  }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+
+  // enable Enter = Brew/Drink, ESC = clear input
+  document.addEventListener('keydown', (e)=>{
+    if ($('#tab-brew').hidden) return;
+    if (e.key==='Enter'){
+      if (!$('#btnDrink').disabled) $('#btnDrink').click(); else $('#btnBrew').click();
+    }else if (e.key==='Escape'){
+      $('#input').value=''; $('#btnDrink').disabled=true; log('info','Input cleared');
+    }
+  });
+
+  function doBrew(){
+    const v = $('#input').value.trim();
+    if (!v){ log('warn','Please type something.'); return; }
+    // mock: accept anything ⇒ enable Drink
+    $('#btnDrink').disabled = false;
+    log('brew', `Potion of ${v.charAt(0).toUpperCase()+v.slice(1)}`);
+  }
+  function doDrink(){
+    const name = $('#input').value.trim();
+    if (!name){ log('warn','Nothing to drink.'); return; }
+    log('drink', `You drink the ${name}. (mock)`);
+    $('#input').value=''; $('#btnDrink').disabled=true;
+    // mock transform visual
+    $('#formName').textContent = name.toLowerCase() || 'human';
+    $('#formImg').textContent = (name||'H').slice(0,1).toUpperCase();
+  }
+
+  $('#btnBrew').addEventListener('click', doBrew);
+  $('#btnDrink').addEventListener('click', doDrink);
+
+  // Settings: clear save (mock)
+  $('#btnClearSave').addEventListener('click', ()=>{ log('reset','Hard reset (mock).'); });
+
+  // ===== Codex mock =====
+  const CODEX = {
+    kw:[{id:'fire', name:'Fire'}, {id:'death', name:'Death'}, {id:'void', name:'Void'}],
+    forms:[{id:'human', name:'Human'}, {id:'vampire', name:'Vampire'}, {id:'phoenix', name:'Phoenix'}],
+    ends:[{id:'burninlight', name:'Burn in Light'}, {id:'voidfall', name:'Voidfall'}]
+  };
+
+  const codexContent = $('#codex-content');
+  function renderCodexGrid(items){
+    const grid = document.createElement('div');
+    grid.className='codex-grid';
+    for (const it of items){
+      const card = document.createElement('div');
+      card.className='codex-card';
+      card.innerHTML = `<div class='name'>${escapeHtml(it.name)}</div><div class='muted'>id: ${escapeHtml(it.id)}</div>`;
+      grid.appendChild(card);
+    }
+    codexContent.replaceChildren(grid);
+  }
+
+  function selectCodex(sub){
+  $$('.codex-btn').forEach(b=>b.setAttribute('aria-selected', b.dataset.sub===sub));
+  if (sub === 'kw') {
+    renderKeywords();
+  } else {
+    // ใช้ grid เดิมสำหรับ forms/endings
+    const items = (sub === 'forms') ? CODEX.forms : CODEX.ends;
+    const grid = document.createElement('div'); grid.className = 'codex-grid';
+    for (const it of items){
+      const card = document.createElement('div'); card.className='codex-card';
+      card.innerHTML = `<div class='name'>${escapeHtml(it.name)}</div><div class='muted'>id: ${escapeHtml(it.id)}</div>`;
+      grid.appendChild(card);
+    }
+    document.querySelector('#codex-content').replaceChildren(grid);
+  }
+}
+  // ===== Keywords codex render =====
+let KW_STATE = { letter:'ALL', selected:null };
+
+function renderKeywords(){
+  const root = $('#codex-content');
+  const wrap = document.createElement('div');
+
+  // 1) แถบหัว (รายการที่ถูกเลือก)
+  const head = document.createElement('div'); head.className='kw-head';
+  const selected = document.createElement('div'); selected.className='kw-selected';
+  const title = document.createElement('div'); title.className='kw-title';
+  const tags  = document.createElement('div'); tags.className='kw-tags';
+  const acts  = document.createElement('div'); acts.className='kw-actions';
+
+  const sel = KW_STATE.selected;
+  if (sel){
+    title.textContent = sel.name || sel.id;
+    // tags
+    (sel.tag||[]).forEach(t=>{
+      const b = document.createElement('span'); b.className='kw-tag'; b.textContent = t;
+      tags.appendChild(b);
+    });
+    // actions
+    const btnBrew = document.createElement('button'); btnBrew.className='btn primary'; btnBrew.textContent='Brew';
+    btnBrew.addEventListener('click', ()=>brewFromKeyword(sel));
+    const btnPrev = document.createElement('button'); btnPrev.className='btn'; btnPrev.textContent='Preview';
+    btnPrev.addEventListener('click', ()=>previewForm(sel.preview, sel.name||sel.id));
+    acts.append(btnBrew, btnPrev);
+  }else{
+    title.textContent = 'เลือกคีย์เวิร์ดจากรายการด้านล่าง';
+  }
+  selected.append(title, tags, acts);
+  head.appendChild(selected);
+
+  // 2) ปุ่ม A-Z
+  const letters = ['ALL'].concat('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''));
+  const az = document.createElement('div'); az.className='kw-az';
+  letters.forEach(L=>{
+    const b = document.createElement('button'); b.className='az-btn'; b.textContent=L;
+    b.setAttribute('aria-pressed', KW_STATE.letter===L ? 'true':'false');
+    b.addEventListener('click', ()=>{ KW_STATE.letter=L; renderKeywords(); });
+    az.appendChild(b);
+  });
+  head.appendChild(az);
+
+  wrap.appendChild(head);
+
+  // 3) รายการคีย์เวิร์ด (เลื่อนลงได้)
+  const list = document.createElement('div'); list.className='kw-list';
+  let items = CODEX.kw.slice();
+  if (KW_STATE.letter!=='ALL'){
+    const l = KW_STATE.letter.toLowerCase();
+    items = items.filter(it => (it.name||it.id||'').toLowerCase().startsWith(l));
+  }
+  // เรียงตามชื่อ
+  items.sort((a,b)=>(a.name||a.id).localeCompare(b.name||b.id));
+
+  for (const it of items){
+    const row = document.createElement('div'); row.className='kw-item';
+    const left = document.createElement('div');
+    const nm = document.createElement('div'); nm.className='name'; nm.textContent = it.name || it.id;
+    const meta = document.createElement('div'); meta.className='id'; meta.textContent = `id: ${it.id}`;
+    left.append(nm, meta);
+
+    const right = document.createElement('div'); right.className='mini-tags';
+    (it.tag||[]).slice(0,3).forEach(t=>{
+      const span = document.createElement('span'); span.className='kw-tag'; span.textContent=t;
+      right.appendChild(span);
+    });
+
+    row.append(left, right);
+    row.addEventListener('click', ()=>{ KW_STATE.selected = it; renderKeywords(); });
+    list.appendChild(row);
+  }
+
+  wrap.appendChild(list);
+  root.replaceChildren(wrap);
+}
+
+// ===== Actions =====
+function brewFromKeyword(kw){
+  // mock: ใส่ชื่อคีย์เวิร์ดลง input แล้วกด Brew
+  const v = (kw?.name || kw?.id || '').toLowerCase();
+  $('#input').value = v;
+  $('#btnBrew').click();          // ใช้ doBrew() ที่มีอยู่แล้วใน mock
+}
+
+function previewForm(formId, label){
+  if (!formId){ log('info','No preview for this keyword.'); return; }
+  // ใน mock: แสดงตัวอักษรเดียวเป็นภาพแทน (ของจริงค่อยดึง asset)
+  $('#kwOverlayImg').textContent = (label||formId).slice(0,1).toUpperCase();
+  $('#kwOverlayName').textContent = formId;
+  $('#kwOverlay').classList.add('active');
+}
+
+// ปิด overlay
+$('#kwOverlayClose')?.addEventListener('click', ()=>$('#kwOverlay').classList.remove('active'));
+$('#kwOverlay')?.addEventListener('click', (e)=>{ if (e.target.id==='kwOverlay') $('#kwOverlay').classList.remove('active'); });
+  </script></body>
+</html>

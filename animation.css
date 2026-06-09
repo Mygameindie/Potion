@@ -1,0 +1,57 @@
+
+/* ===== Animation Pack: Brew Progress, Overlay Fade, Transform Flash ===== */
+
+/* --- Brew Progress Bar --- */
+#brew-progress {
+  position: fixed; /* sit above gameplay; change to absolute within container if preferred */
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  width: min(640px, 70vw);
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+  z-index: 5000;
+}
+#brew-progress.show { opacity: 1; }
+#brew-progress .bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(140,200,255,1), rgba(110,240,255,1));
+  background-size: 200% 100%;
+  animation: brewGlow 1200ms linear infinite;
+}
+@keyframes brewGlow {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* --- Screen-wide black flash for form transform --- */
+#flash-black {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 6000;
+}
+.flash-active {
+  animation: flashDark 300ms ease-in-out var(--flash-count, 3);
+}
+@keyframes flashDark {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* --- Generic fade-in/out helpers for overlays/endings --- */
+.fadeable {
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+.fadeable.is-open {
+  opacity: 1;
+}

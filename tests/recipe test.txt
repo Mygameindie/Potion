@@ -1,0 +1,99 @@
+// ====== DATA_RECIPES Auto Test Runner ======
+(function runRecipeTests(){
+  const asArray = (x)=> Array.isArray(x) ? x : (x && typeof x==='object' ? Object.values(x) : []);
+  const REC = asArray(window.DATA_RECIPES || window.RECIPES || []);
+  const results = [];
+  const pad = (s,w)=>String(s).padEnd(w,' ');
+  const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+  // init Chain with capture callbacks
+  let last = {type:null, id:null};
+  window.Chain.init({
+    onTransform: id => { last = {type:'form', id}; },
+    onEvo:       id => { last = {type:'evo',  id}; },
+    onEnd:       id => { last = {type:'end',  id}; },
+    log:         msg => {},
+    onBufferChange: ()=>{}
+  });
+
+  // helper: run one recipe
+  async function runOne(rec){
+    // Reset state
+    window.Chain.resetBuffer();
+
+    // set form (start form)
+    const startForm = rec.form || 'human';
+    window.Chain.setForm(startForm);
+    last = {type:null, id:null};
+
+    // feed sequence
+    const cups = (rec.requires||[]).map(x=>x.cup);
+    for (const c of cups){
+      window.Chain.feed(c);
+      // micro delay for UI callbacks (usually not needed, but safe)
+      // eslint-disable-next-line no-await-in-loop
+      await sleep(0);
+    }
+
+    // expected
+    const expected = rec.toForm ? {type:'form', id:rec.toForm}
+                   : rec.toEvo  ? {type:'evo',  id:rec.toEvo}
+                   : rec.toEnd  ? {type:'end',  id:rec.toEnd}
+                   : {type:null,id:null};
+
+    // buffer should be cleared on outcome
+    const buf = window.Chain.getBuffer();
+    const bufferCleared = expected.type ? (buf.length===0) : true; // if there is outcome, expect 0
+
+    const ok = expected.type
+      ? (last.type===expected.type && last.id===expected.id && bufferCleared)
+      : (last.type===null && last.id===null); // no outcome recipe (shouldn’t happen here)
+
+    return {
+      id: rec.id,
+      form: startForm,
+      seq: cups.join(' + '),
+      expected: expected.type ? `${expected.type}:${expected.id}` : '(none)',
+      got: last.type ? `${last.type}:${last.id}` : '(none)',
+      bufCleared: bufferCleared,
+      ok
+    };
+  }
+
+  (async () => {
+    if (!REC.length){
+      console.warn('[Recipe Test] No DATA_RECIPES found'); 
+      return;
+    }
+    console.log(`[Recipe Test] Running ${REC.length} recipes…`);
+    for (const rec of REC){
+      // ข้ามเรซิพีที่กำหนด denyForms = form เอง (ไม่มีวันติดโดยดีไซน์)
+      if (rec.form && Array.isArray(rec.denyForms) && rec.denyForms.includes(rec.form)){
+        results.push({ id:rec.id, form:rec.form, seq:'(skipped: denyForms includes start form)', expected:'-', got:'-', bufCleared:'-', ok:true });
+        continue;
+      }
+      // run
+      // eslint-disable-next-line no-await-in-loop
+      const r = await runOne(rec);
+      results.push(r);
+    }
+
+    // summary
+    const pass = results.filter(r=>r.ok).length;
+    const fail = results.length - pass;
+
+    console.log('='.repeat(60));
+    console.log(`[Recipe Test] PASS ${pass}/${results.length}  FAIL ${fail}`);
+    console.table(results.map(r=>({
+      id:r.id, form:r.form, seq:r.seq,
+      expected:r.expected, got:r.got,
+      bufferCleared:r.bufCleared, ok:r.ok
+    })));
+
+    if (fail>0){
+      console.warn('❌ Some recipes failed. Check rows with ok=false above.');
+    }else{
+      console.log('%cAll recipes passed!','color:#86e49d;font-weight:bold;');
+    }
+  })();
+})();

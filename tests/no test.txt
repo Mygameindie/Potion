@@ -1,0 +1,95 @@
+// ===== Forms `no` Audit (Duplicates, Format, Gaps) =====
+(function auditFormsNo(opts = { checkGaps: true, strictWidth: true }){
+  const { checkGaps, strictWidth } = opts;
+
+  const asArray = (x)=> Array.isArray(x) ? x.filter(Boolean) :
+    x && typeof x==='object' ? Object.values(x).filter(Boolean) : [];
+
+  // 1) ดึงข้อมูลจาก DATA_FORMS หรือ getForms()
+  const raw = window.DATA_FORMS || {};
+  const rawArr = asArray(raw);
+  let forms = [];
+  if (typeof window.getForms === 'function') {
+    // รวม field จาก getForms() + เติมฟิลด์เสริมจาก raw ตาม id
+    const byId = Object.fromEntries(rawArr.map(f=>[f.id, f]));
+    forms = window.getForms().map(f=>{
+      const r = byId[f.id] || {};
+      return { id:f.id, name:f.name||f.id, no:(f.no ?? r.no) ?? null };
+    });
+  } else {
+    forms = rawArr.map(f => ({ id:f.id, name:f.name||f.id, no:f.no ?? null }));
+  }
+
+  // 2) เตรียมตรวจ
+  const issues = [];
+  const seenNo = new Map();
+  const onlyWithNo = forms.filter(f=> f.no!=null);
+  const widths = onlyWithNo.map(f=> String(f.no).length);
+  const commonWidth = widths.length ? Number([...widths].sort((a,b)=> 
+    widths.filter(w=>w===a).length - widths.filter(w=>w===b).length
+  ).pop()) : null;
+
+  // 3) ตรวจทีละรายการ
+  const NO_RE = /^\d+$/;
+  for (const f of forms){
+    const row = { id: f.id, name: f.name, no: f.no, problem: [] };
+    if (f.no==null || f.no==='') {
+      row.problem.push('missing-no');
+    } else {
+      const s = String(f.no);
+      if (!NO_RE.test(s)) row.problem.push('non-numeric');
+      if (strictWidth && commonWidth!=null && s.length!==commonWidth) row.problem.push(`width-${s.length}-vs-${commonWidth}`);
+      if (seenNo.has(s)) {
+        const other = seenNo.get(s);
+        row.problem.push(`duplicate-with:${other}`);
+      } else {
+        seenNo.set(s, f.id);
+      }
+    }
+    if (row.problem.length) issues.push(row);
+  }
+
+  // 4) ตรวจช่องโหว่ของลำดับ (optional)
+  let gaps = [];
+  if (checkGaps && onlyWithNo.length){
+    const nums = onlyWithNo
+      .map(f => Number(String(f.no)))
+      .filter(n => Number.isFinite(n))
+      .sort((a,b)=>a-b);
+    const uniq = [...new Set(nums)];
+    for (let i=1;i<uniq.length;i++){
+      const prev = uniq[i-1], cur = uniq[i];
+      if (cur - prev > 1) {
+        gaps.push({ from: prev, to: cur, missing: (cur - prev - 1) });
+      }
+    }
+  }
+
+  // 5) สรุปผล
+  const dupCount = issues.filter(r => r.problem.some(p=>p.startsWith('duplicate-with'))).length;
+  const missCount = issues.filter(r => r.problem.includes('missing-no')).length;
+  const nonNum    = issues.filter(r => r.problem.includes('non-numeric')).length;
+  const widthBad  = issues.filter(r => r.problem.some(p=>p.startsWith('width-'))).length;
+
+  const ok = (dupCount===0 && missCount===0 && nonNum===0 && (!strictWidth || widthBad===0));
+  const color = ok ? '#86e49d' : '#f56b6b';
+
+  console.log('%c[FORMS NO AUDIT] =========================', 'color:#9aa3b2');
+  console.log(`Total forms: ${forms.length}`);
+  console.log(`With no: ${onlyWithNo.length}, Without no: ${forms.length - onlyWithNo.length}`);
+  if (commonWidth!=null) console.log(`Common width: ${commonWidth} (strict: ${strictWidth})`);
+  console.log(`Duplicates: ${dupCount}, Missing: ${missCount}, Non-numeric: ${nonNum}, Width-mismatch: ${widthBad}`);
+  if (gaps.length) {
+    console.log(`Gaps (numeric sequence): ${gaps.length}`);
+    console.table(gaps);
+  }
+  if (issues.length){
+    // แสดงเฉพาะปัญหา เพื่ออ่านง่าย
+    console.table(issues.map(x=>({
+      id:x.id, name:x.name, no:x.no, problem:x.problem.join('|')
+    })));
+  }
+  console.log('%cResult: ' + (ok ? 'PASS' : 'NEEDS ATTENTION'), `color:${color}; font-weight:700`);
+
+  return { ok, issues, gaps, forms, commonWidth };
+})();

@@ -1,0 +1,215 @@
+เยี่ยม—ไปทาง “บิวด์ใหม่” จากไฟล์ poe_chain_buffer_mock.html เลยครับ!
+ผมสรุปแผนงานแบบเป็นขั้น ๆ ให้พร้อมเกณฑ์ทดสอบ (acceptance) และลำดับไฟล์/ฮุคที่ต้องมี ตั้งเป้าออก v4.5 (clean core)
+
+Roadmap บิวด์ใหม่ (จาก Mock Engine)
+
+Phase 0 — Base project (วันเดียว)
+
+เป้า: แยก Mock ให้เป็นโครงโปรเจ็กต์จริง แต่ยังคงพฤติกรรมเดิมทุกประการ
+
+โครงไฟล์
+
+/assets/...
+/data/
+  data_keywords.js
+  data_forms.js
+  data_endings.js
+  data_recipes.js
+/src/
+  engine/chain.js            // mock engine → แตกไฟล์ออกมาจาก HTML
+  engine/overlay.js          // overlay เดิมจาก mock (ฟังก์ชันเดียว)
+  engine/save.js             // localStorage + markSeen helpers
+  engine/codex-state.js      // state ที่ดึงจาก SAVE + data
+  ui/app.js                  // bootstrap + route tab (Brew/Codex/Settings)
+  ui/brew.js                 // brew + drink glue → เรียก chain
+  ui/codex.js                // mock codex (รายการพื้นฐาน)
+  ui/settings.js             // reset save
+index.html
+style.css
+
+ย้ายโค้ดจาก mock
+
+engine/chain.js = logic BUFFER ทั้งหมด (matchFull / anyPartialMulti / matchSingle / applyOutcome_light / resetBuffer ฯลฯ)
+
+ui/brew.js = ฟังก์ชัน brew(), drink() ที่เรียก chain โดยตรง
+
+engine/overlay.js = overlay เดิม 1 กล่อง (รองรับ showEndingOverlayById, showEvolutionOverlay)
+
+engine/save.js = ensureSave(), saveNow(), markKeywordSeen/markFormSeen/markEndingSeen
+
+engine/codex-state.js = แค่ sync counts (ยังไม่ต้องมี UI สวย)
+
+
+เกณฑ์ทดสอบ
+
+กด drink ตามปุ่มใน mock → ได้ผลเหมือนเดิม 100%
+
+Transform แล้ว ล้าง/รักษา buffer ตามกติกาใหม่ (Transform/Evo: buffer คงอยู่เพื่อเชนต่อ, Ending: buffer ถูกล้าง)
+
+Death vs Phoenix / Zombie Phoenix เล่นได้ และ denyKeywords/denyForms ทำงาน
+
+
+
+---
+
+Phase 1 — Data Adapter (1–2 วัน)
+
+เป้า: ใช้ data_recipes.js ของโปรเจ็กต์จริงได้ โดยต่อเข้ากับ engine ใหม่
+
+ทำอะไร
+
+สร้าง src/engine/adapter.js
+
+อ่าน DATA_RECIPES (สchemas เก่า) → แปลงเป็น { id, form?, requires:[{cup}], window:{drinks, contiguous}, priority, denyForms, denyKeywords, toForm|toEnd|toEvo }
+
+ขยาย count เป็นซ้ำ ๆ ใน requires
+
+Map window.contiguousOnly -> contiguous
+
+
+
+เกณฑ์ทดสอบ
+
+console.log [ADAPTER] recipes adapted: N
+
+เคส Fire Elemental / Void Elemental / Thrackulent → ทำงานตาม “กฎ buffer” ไม่มีการแย่งลั่นผิด
+
+
+
+---
+
+Phase 2 — Overlay & Hook มาตรฐาน (ครึ่งวัน)
+
+เป้า: ให้ผลลัพธ์ทุกชนิดวิ่งเข้าทางเดียว
+
+ทำอะไร
+
+engine/chain.js เรียก callback:
+
+onTransform(formId), onEvo(evoId), onEnd(endId)
+
+
+แผงกลาง (ui/app.js) ลงทะเบียน callback:
+
+บันทึก SAVE + markSeen + เรียก overlay.showEnd(id) / overlay.showEvo(new, prev) + appendLog
+
+
+เพิ่ม “Reborn Target” จาก data_endings.js (field rebornTo)
+
+
+เกณฑ์ทดสอบ
+
+ได้ Ending → overlay โผล่ ชื่อ/รูปตาม data, กด Reborn → setForm ถูกต้องและ markSeen form
+
+
+
+---
+
+Phase 3 — Codex (1–2 วัน)
+
+เป้า: UI Codex แบบเรียบง่าย แต่ครบฟังก์ชัน
+
+ทำอะไร
+
+ui/codex.js:
+
+แท็บ: Keywords / Forms / Endings
+
+Keywords: รายชื่อ (ไม่โชว์ synonyms), คลิกแล้วโชว์ badges (lethal/transform/evo/dialogue) + ปุ่ม “ใส่ลง Brew”
+
+Forms/Endings: grid 2×6 + preview (รูป/ชื่อ/กลุ่ม, endings: reqForm/combo หากมี)
+
+
+engine/codex-state.js: ดึงจาก SAVE เพื่อคำนวณ (found/total) แล้วให้ codex.updateCounters()
+
+
+เกณฑ์ทดสอบ
+
+ดื่ม → markSeen keyword/ form/ ending อัปเดตตัวเลขแบบเรียลไทม์
+
+โหลดใหม่ (F5) → ข้อมูลค้นพบยังอยู่
+
+
+
+---
+
+Phase 4 — Settings (ครึ่งวัน)
+
+เป้า: Hard Reset (ล้างเซฟทั้งหมด) + Credits
+
+ทำอะไร
+
+ui/settings.js ปุ่ม “Hard Reset (ล้างเซฟทั้งหมด)”
+
+Credits ใส่ในหน้า Settings
+
+
+เกณฑ์ทดสอบ
+
+Hard Reset แล้ว: form=human, buffer ว่าง, codex counters = 0/total, ไม่มีของค้าง
+
+
+
+---
+
+Phase 5 — Regression & Edge Cases (1 วัน)
+
+เช็คลิสต์
+
+[ ] สูตร 1 ขวด (เช่น fire → burned) ทำงานทันที
+
+[ ] สูตรหลายขวด contiguous (blood×2 → vampire) ต้องดื่มติดกันจริง
+
+[ ] Form-locked (dragon + fire → fire_dragon) ได้เฉพาะตอนเป็น dragon
+
+[ ] Death vs Phoenix vs Zombie Phoenix:
+
+phoenix + death×2 → phoenixdeath (block generic death)
+
+zombiephoenix + death → zombiephoenixdeath
+
+generic death: any + death → you_died (ยกเว้น denyForms/denyKeywords)
+
+
+[ ] Immortality + Fire → Fire Elemental (ไม่โดนสูตรอื่นแย่ง)
+
+[ ] Immortality + Inside + Outside → Voidtouch / Void Elemental (กรณีคุณนิยามไว้)
+
+[ ] Transform/Evo ไม่ล้าง buffer; Ending ล้าง buffer
+
+[ ] denyForms/denyKeywords ทำงานจริง (ทดสอบกรณีแคนเซิลฉากจบด้วย immortal)
+
+[ ] reload แล้ว SAVE ยังดี
+
+
+
+---
+
+Phase 6 — (ถัดไป) Systems ที่ค่อย ๆ เติม
+
+Dialogue (postDrink / beforeEnd / beforeEvo / beforeForm) → เล่นใน Log แบบ minimal (คลิกที่กล่องเพื่อไปบรรทัดถัดไป)
+
+Achievements engine ใหม่ (data-driven) (ทำตอนท้าย)
+
+Animation / UI polish (lazy-load images, responsive, micro tabs)
+
+Mod hooks (ปล่อย window APIs: Chain.feed, Chain.addRecipe, overlay.showEnd, save.markSeen, …)
+
+
+
+---
+
+สิ่งที่ผมจะเริ่มทำทันที
+
+1. แตก mock เป็นไฟล์ engine/chain.js, ui/brew.js, engine/overlay.js, engine/save.js
+
+
+2. ใส่ adapter ง่าย ๆ อ่าน DATA_RECIPES → window.RECIPES แบบ engine ใหม่
+
+
+3. วาง callback 3 ตัว onTransform/onEvo/onEnd แล้วให้ overlay โผล่พร้อม markSeen
+
+
+
+พอคุณบอกพร้อม ผมจะส่ง “สเกลโค้ดชุดแรก (Phase 0–1)” ให้คุณนำไปวางได้ทันทีครับ
+

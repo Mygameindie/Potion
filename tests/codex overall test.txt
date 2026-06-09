@@ -1,0 +1,224 @@
+// ================== Codex Full Test Suite ==================
+// ทดสอบ Summary Bar + Keywords + Forms + Endings ครบชุด
+// ไม่แก้อะไรถาวรนอกจากเซฟ (มี backup/restore ให้ท้ายสคริปต์ — uncomment ได้)
+
+// ---------- Helpers ----------
+const $  = (s,root=document)=>root.querySelector(s);
+const $$ = (s,root=document)=>[...root.querySelectorAll(s)];
+const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+const log = (ok,msg)=>console.log((ok?'✅':'❌')+' '+msg);
+const info = (msg)=>console.log('%c'+msg,'color:#9aa3b2');
+
+// Safe calls
+const has = (p)=>p && typeof p==='function';
+const codex = ()=>({ 
+  kw: has(window.Codex?.renderKeywords),
+  fm: has(window.Codex?.renderForms),
+  ed: has(window.Codex?.renderEndings),
+  sb: has(window.Codex?.renderSummaryBar),
+});
+
+// ---------- Boot checks ----------
+if (!window.ensureSave){ console.warn('ensureSave() not found'); }
+if (!$('#tab-codex')){ console.warn('No #tab-codex panel in DOM'); }
+if (!$('#codex-summary')){ console.warn('No #codex-summary host in DOM'); }
+
+// ---------- Nav: go to Codex / set sub-tab ----------
+function gotoCodex(sub='kw'){
+  $('.tab-btn[data-tab="codex"]')?.click();
+  const btn = $(`.codex-btn[data-sub="${sub}"]`);
+  btn?.click();
+  // fallback render
+  if (sub==='kw') window.Codex?.renderKeywords?.();
+  else if (sub==='forms') window.Codex?.renderForms?.();
+  else window.Codex?.renderEndings?.();
+  window.Codex?.renderSummaryBar?.();
+}
+function readSummaryNumbers(){
+  const el = $('#codex-summary'); if (!el) return null;
+  const txt = el.textContent.replace(/\s+/g,' ').trim();
+  const m = txt.match(/Keywords\s+(\d+)\s*\/\s*(\d+).*Forms\s+(\d+)\s*\/\s*(\d+).*Endings\s+(\d+)\s*\/\s*(\d+).*Evolutions\s+(\d+)/i);
+  if (!m) return null;
+  return {Kx:+m[1],Ky:+m[2],Fx:+m[3],Fy:+m[4],Ex:+m[5],Ey:+m[6],Evo:+m[7]};
+}
+
+// ---------- Data pickers ----------
+const KW_ARR = Array.isArray(window.DATA_KEYWORDS)? window.DATA_KEYWORDS : [];
+const KW_SAMPLE = KW_ARR.find(k=>k?.id);
+
+const FORMS_MAP = window.DATA_FORMS || {};
+let BASE_ID=null, EVO_ID=null;
+for (const id in FORMS_MAP){
+  const evo = FORMS_MAP[id]?.evoAlt;
+  if (evo && FORMS_MAP[evo]){ BASE_ID=id; EVO_ID=evo; break; }
+}
+
+const END_ARR = Array.isArray(window.DATA_ENDINGS_NEW)? window.DATA_ENDINGS_NEW : [];
+const END_SAMPLE = END_ARR.find(e=>e?.id);
+
+// ---------- Save backup/reset ----------
+const S = window.ensureSave?.();
+const BACKUP = S ? JSON.stringify(S) : null;
+
+function resetDiscovery(){
+  const s = window.ensureSave?.(); if (!s) return;
+  s.seenKeywords = {};
+  s.seenForms    = {};
+  s.seenEndings  = {};
+  s.counters = {
+    keywordsDiscovered: 0,
+    formsDiscovered: 0,
+    endingsDiscovered: 0,
+    evolutionsDiscovered: 0
+  };
+  window.saveNow?.();
+}
+
+// ---------- DOM probes for Forms / Endings viewers ----------
+function formsProbe(){
+  return {
+    viewerName: $('.viewer-name')?.textContent?.trim() || '',
+    viewerHasImg: $('.viewer-img')?.classList?.contains('has-img') || false,
+    gridCards: $$('.forms-grid .form-card').length,
+    selectedId: (window.Codex?.renderForms?.state?.selectedId)||null
+  };
+}
+function endingsProbe(){
+  return {
+    viewerName: $('.ending-viewer .ending-name')?.textContent?.trim() || '',
+    viewerHasImg: $('.ending-viewer .ending-img')?.classList?.contains('has-img') || false,
+    isViewerLocked: $('.ending-viewer .ending-img')?.classList?.contains('is-locked') || false,
+    gridCards: $$('.endings-grid .ending-card').length,
+    selectedId: (window.Codex?.renderEndings?.state?.selectedId)||null
+  };
+}
+
+// ================== TEST RUN ==================
+(async function run(){
+  info('[0] Reset & open Codex');
+  resetDiscovery();
+  gotoCodex('kw');
+  await sleep(50);
+  let nums = readSummaryNumbers();
+  log(!!nums, 'Summary bar visible');
+  if (!nums) return;
+  log(nums.Kx===0 && nums.Fx===0 && nums.Ex===0 && nums.Evo===0, 'Initial discovered = 0');
+  
+  // -------- Keywords --------
+  info('[1] Keywords: mark first keyword and update summary');
+  if (KW_SAMPLE){
+    gotoCodex('kw'); await sleep(30);
+    const before = readSummaryNumbers();
+    window.markKeywordSeen?.(KW_SAMPLE.id);
+    // trigger refresh like production flow
+    window.Codex?.renderKeywords?.(); window.Codex?.renderSummaryBar?.(); 
+    await sleep(30);
+    nums = readSummaryNumbers();
+    log(nums.Kx===((before?.Kx||0)+1), 'keywordsDiscovered +1 on first mark');
+  }else{
+    console.warn('No keyword in DATA_KEYWORDS → skip KW tests');
+  }
+
+  // -------- Forms --------
+  info('[2] Forms: base discover + evo discover + evoOnly hidden');
+  if (BASE_ID){
+    gotoCodex('forms'); await sleep(30);
+    window.Codex?.renderForms?.(); window.Codex?.renderSummaryBar?.();
+    await sleep(30);
+    let fp = formsProbe();
+    log(fp.gridCards>0, 'Forms grid rendered');
+
+    // base first discover
+    const before = readSummaryNumbers();
+    window.markFormSeen?.(BASE_ID);
+    window.Codex?.renderForms?.(); window.Codex?.renderSummaryBar?.();
+    await sleep(30);
+    let after = readSummaryNumbers();
+    log(after.Fx === before.Fx + 1, 'formsDiscovered +1 on base first discover');
+
+    // evo discover (if exists)
+    if (EVO_ID){
+      const evoBefore = after.Evo;
+      window.markFormSeen?.(EVO_ID);
+      window.Codex?.renderForms?.(); window.Codex?.renderSummaryBar?.();
+      await sleep(30);
+      after = readSummaryNumbers();
+      log(after.Evo === evoBefore + 1, 'evolutionsDiscovered +1 on evo first discover');
+
+      // evoOnly hidden in grid (if evoOnly flag present)
+      const evoOnly = !!FORMS_MAP[EVO_ID]?.evoOnly;
+      if (evoOnly){
+        const foundInGrid = !!$$('.forms-grid .form-card').find(c=> (c?.title||'').trim()===`id: ${EVO_ID}`);
+        log(!foundInGrid, 'evoOnly form is hidden from grid');
+      }
+    }
+  }else{
+    console.warn('No base/evo pair in DATA_FORMS → skip Forms tests');
+  }
+
+  // -------- Endings --------
+  info('[3] Endings: undiscovered blur + alert on click + discover updates');
+  if (END_SAMPLE){
+    gotoCodex('endings'); await sleep(30);
+    window.Codex?.resetEndingsSelection?.(); window.Codex?.renderEndings?.(); window.Codex?.renderSummaryBar?.();
+    await sleep(30);
+    let ep = endingsProbe();
+    log(!ep.selectedId && ep.viewerName.includes('เลือกฉากจบ') || !ep.viewerHasImg, 'Endings viewer starts unselected');
+
+    // choose a card (should alert if undiscovered)
+    const anyCard = $('.endings-grid .ending-card');
+    if (anyCard){
+      // monkey-patch alert to catch call
+      let alerted=false; const _alert = window.alert; window.alert = ()=>{alerted=true;};
+      anyCard.click(); await sleep(20);
+      window.alert = _alert;
+      log(alerted===true, 'Click undiscovered ending shows alert');
+    }
+
+    // discover one ending
+    const before = readSummaryNumbers();
+    window.markEndingSeen?.(END_SAMPLE.id);
+    window.Codex?.renderEndings?.(); window.Codex?.renderSummaryBar?.();
+    await sleep(30);
+    const after = readSummaryNumbers();
+    log(after.Ex === before.Ex + 1, 'endingsDiscovered +1 on first mark');
+
+    // select discovered card, viewer shows image (if available) and name != '???'
+    // try to click the first discovered card
+    const cards = $$('.endings-grid .ending-card');
+    const discoveredCard = cards.find(c=> !c.querySelector('.ending-thumb.is-locked'));
+    if (discoveredCard){
+      discoveredCard.click(); await sleep(20);
+      ep = endingsProbe();
+      log(!!ep.selectedId, 'Ending selected');
+      log(ep.viewerName !== '???', 'Ending viewer shows name (discovered)');
+      // image might be optional; if overlay.image exists, viewer should not be locked
+      const hasImage = !!(END_SAMPLE.overlay?.image);
+      if (hasImage){
+        log(ep.viewerHasImg && !ep.isViewerLocked, 'Ending viewer shows image & not locked');
+      }
+    }
+  }else{
+    console.warn('No ending in DATA_ENDINGS_NEW → skip Endings tests');
+  }
+
+  info('[4] Idempotency — re-mark should not increment counters');
+  const before = readSummaryNumbers();
+  if (KW_SAMPLE)  window.markKeywordSeen?.(KW_SAMPLE.id);
+  if (BASE_ID)    window.markFormSeen?.(BASE_ID);
+  if (EVO_ID)     window.markFormSeen?.(EVO_ID);
+  if (END_SAMPLE) window.markEndingSeen?.(END_SAMPLE.id);
+  window.Codex?.renderSummaryBar?.();
+  await sleep(20);
+  const again = readSummaryNumbers();
+  log(JSON.stringify(before)===JSON.stringify(again), 'No increments on re-mark (first-time only)');
+
+  console.log('%c[Done] ถ้าส่วนใหญ่เป็น ✅ แปลว่าระบบ Codex ผ่านการทดสอบพื้นฐานแล้ว', 'color:#86e49d');
+
+  // -------- (Optional) Restore save --------
+  // if (BACKUP && window.ensureSave){
+  //   const cur = window.ensureSave(); Object.keys(cur).forEach(k=>delete cur[k]);
+  //   Object.assign(cur, JSON.parse(BACKUP)); window.saveNow?.();
+  //   console.log('Save restored.');
+  // }
+})();
