@@ -58,17 +58,20 @@ If you merge this into `main`, swap `claude/zip-extract-organize-ediwt4` for
 
 ## 🔗 Permanent link (GitHub Pages)
 
-For the clean one-click URL **https://mygameindie.github.io/Potion/**, the repo
-includes a Pages workflow (`.github/workflows/pages.yml`) that publishes the
-`Main/` folder. To turn it on (one time):
+The repo includes a Pages workflow (`.github/workflows/pages.yml`) that publishes
+the `Main/` folder to **https://mygameindie.github.io/Potion/**.
 
-1. Merge this branch into `main` (the workflow deploys from `main`).
-2. In the repo: **Settings → Pages → Build and deployment → Source: "GitHub
-   Actions"**.
-3. The **Deploy game to GitHub Pages** action runs and the link goes live. You
-   can also re-run it any time from the **Actions** tab (*Run workflow*).
+Publishing needs **one manual click that only the repo owner can do** (GitHub
+doesn't let an automated action switch Pages on for you):
 
-Until then, use the **githack** button above — it works immediately.
+1. **Settings → Pages → Build and deployment → Source: "GitHub Actions".**
+2. Get the workflow onto `main` — merge this branch (e.g. via Pull Request #1).
+3. The **Deploy game to GitHub Pages** action runs automatically and the link
+   goes live. After that, every push to `main` redeploys it. (You can also
+   trigger it manually from the **Actions** tab → *Run workflow*.)
+
+Until then — and as a permanent fallback — use the **githack** button above; it
+works immediately with zero setup.
 
 ## 💻 Run it locally
 

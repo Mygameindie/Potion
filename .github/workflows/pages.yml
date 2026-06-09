@@ -9,7 +9,7 @@ name: Deploy game to GitHub Pages
 
 on:
   push:
-    branches: [main, claude/zip-extract-organize-ediwt4]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
