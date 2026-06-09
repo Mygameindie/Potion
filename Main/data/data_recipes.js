@@ -39,7 +39,7 @@ window.DATA_RECIPES = [
     id:"evo_dual_reaper",
     form:"reaper",
     requires:[ { cup:"evolution" } ],
-    toEvo:[ "chain_reaper_evo", "chaos_reaper_evo" ]
+    toEvoOneOf:[ "chain_reaper_evo", "chaos_reaper_evo" ]
   },
   {
     id:"evo_cow_milk_to_mily_tank",

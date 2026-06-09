@@ -84,54 +84,69 @@ function guardDeny(rec, bufIds, formId){
   return true;
 }
 
-// Single pass over RECIPES that resolves all three questions at once:
-//  - full   : best recipe whose `requires` fully matches the buffer tail
-//  - expecting : true if some recipe is a longer chain still waiting for cups
-//  - single : best 1-cup fallback recipe for the cup just fed
-// (Previously this was three separate full scans of the recipe list.)
-function analyze(lastCup){
+function matchByFullSequence(){
   const R = window.RECIPES || [];
+  let best = null;
   const formId = FORM;
-  const bufIds = BUFFER;            // read-only here; no need to copy
-  const blen = bufIds.length;
-
-  let full = null, expecting = false, single = null;
-
+  const bufIds = BUFFER.slice();
   for (const rec of R){
     if (!guardForm(rec, formId) || !guardDeny(rec, bufIds, formId)) continue;
-    const reqs = rec.requires || [];
-    const nlen = reqs.length;
-    if (!nlen) continue;
-
-    if (blen >= nlen){
-      // full tail match
+    const need = (rec.requires||[]).map(x=>x.cup);
+    if (!need.length) continue;
+    if (bufIds.length >= need.length){
+      const tail = bufIds.slice(-need.length);
       let ok = true;
-      for (let i=0;i<nlen;i++){ if (bufIds[blen-nlen+i] !== reqs[i].cup){ ok=false; break; } }
+      for (let i=0;i<need.length;i++){ if (tail[i] !== need[i]) { ok=false; break; } }
       if (ok){
-        const rp = rec.priority||0, bp = full ? (full.priority||0) : -1;
-        const bl = full ? (full.requires||[]).length : -1;
-        const rHasForm = !!rec.form, bHasForm = !!(full && full.form);
-        if (!full || rp>bp || (rp===bp && nlen>bl) || (rp===bp && nlen===bl && rHasForm && !bHasForm)){
-          full = rec;
+        // keep your scoring preference
+        const rp = rec.priority||0, bp = best ? (best.priority||0) : -1;
+        const rl = need.length,       bl = best ? (best.requires||[]).length : -1;
+        const rHasForm = !!rec.form,  bHasForm = !!(best && best.form);
+        if (!best || rp>bp || (rp===bp && rl>bl) || (rp===bp && rl===bl && rHasForm && !bHasForm)){
+          best = rec;
         }
       }
-      // single-cup fallback candidate
-      if (nlen === 1 && lastCup && reqs[0].cup === lastCup){
-        const rp = rec.priority||0, bp = single ? (single.priority||0) : -1;
-        const rHasForm = !!rec.form, bHasForm = !!(single && single.form);
-        if (!single || rp>bp || (rp===bp && rHasForm && !bHasForm)){
-          single = rec;
-        }
-      }
-    } else if (!expecting){
-      // longer chain → prefix match means it is still waiting for more cups
-      let ok = true;
-      for (let i=0;i<blen;i++){ if (reqs[i].cup !== bufIds[i]){ ok=false; break; } }
-      if (ok) expecting = true;
     }
   }
+  return best;
+}
 
-  return { full, expecting, single };
+function isAnyRecipeExpectingMore(){
+  const R = window.RECIPES || [];
+  const formId = FORM;
+  const bufIds = BUFFER.slice();
+  for (const rec of R){
+    if (!guardForm(rec, formId) || !guardDeny(rec, bufIds, formId)) continue;
+    const need = (rec.requires||[]).map(x=>x.cup);
+    if (need.length > bufIds.length){
+      // prefix match
+      let ok = true;
+      for (let i=0;i<bufIds.length;i++){ if (need[i] !== bufIds[i]) { ok=false; break; } }
+      if (ok) return true;
+    }
+  }
+  return false;
+}
+
+function matchSingleCupFallback(lastCup){
+  if (!lastCup) return null;
+  const R = window.RECIPES || [];
+  let best=null;
+  const formId = FORM;
+  const bufIds = BUFFER.slice();
+  for (const rec of R){
+    if (!guardForm(rec, formId) || !guardDeny(rec, bufIds, formId)) continue;
+    const need = (rec.requires||[]).map(x=>x.cup);
+    if (need.length !== 1) continue;
+    if (need[0] === lastCup){
+      const rp = rec.priority||0, bp = best ? (best.priority||0) : -1;
+      const rHasForm = !!rec.form,  bHasForm = !!(best && best.form);
+      if (!best || rp>bp || (rp===bp && rHasForm && !bHasForm)){
+        best = rec;
+      }
+    }
+  }
+  return best;
 }
 
   function consumeFromBuffer(n){
@@ -213,24 +228,23 @@ if (rec.toEvo){
     resetBuffer(){ BUFFER.length = 0; notifyBuffer(); },
 
     feed(cup){
-      const c = String(cup);
-      BUFFER.push(c);
+      BUFFER.push(String(cup));
       notifyBuffer();
 
-      const { full, expecting, single } = analyze(c);
-
       // (1) full match?
+      const full = matchByFullSequence();
       if (full){
         consumeFromBuffer((full.requires||[]).length);
         applyOutcome(full);
         return true;
       }
       // (2) เชนหลายคัพกำลังรอ → รอ
-      if (expecting){
+      if (isAnyRecipeExpectingMore()){
         CB.log && CB.log('…waiting for next cup');
         return false;
       }
       // (3) สูตรคัพเดียว (fallback)
+      const single = matchSingleCupFallback(cup);
       if (single){
         consumeFromBuffer(1);
         applyOutcome(single);

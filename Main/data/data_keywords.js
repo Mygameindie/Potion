@@ -66,9 +66,7 @@ window.DATA_KEYWORDS = [
   { id:"evolution", name:"Evolution", synonyms:["evo"],          lethal:false, transform:false, evoable:false, dialogue:false },
   { id:"stone", name:"Stone", synonyms:["Rock"],          lethal:false, transform:true, evoable:false, dialogue:false },
   { id:"death", name:"Death", synonyms:["die"], tag:["4","5"], preview:"reaper" },
-  { id:"immortality",      name:"Immortality",      synonyms:["immunity"],         lethal:false,  transform:true, evoable:false, dialogue:false },
-  { id:"sun",      name:"Sun",      synonyms:["sunlight","daylight"], tag:["1","4","5"] },
-  { id:"gravity",  name:"Gravity",  synonyms:["weight"],              tag:["1","4","5"] }
+  { id:"immortality",      name:"Immortality",      synonyms:["immunity"],         lethal:false,  transform:true, evoable:false, dialogue:false }
 ];
 
 

@@ -22,17 +22,10 @@ window.DATA_FORMS = {
   zombie:{ id:"zombie", name:"Zombie", image:"assets/forms/dragon.png"},
   reaper:{ id:"reaper", name:"Reaper", image:"assets/forms/dragon.png", evoAlt:"chain_reaper_evo"},
   chain_reaper_evo:{ id:"chain_reaper_evo", name:"Chained Reaper", image:"assets/forms/dragon.png", evoOnly: true},
-  chaos_reaper_evo:{ id:"chaos_reaper_evo", name:"Chaos Reaper", image:"assets/forms/dragon.png", evoOnly: true},
+  chaos_reaper_evo:{ id:"chain_reaper_evo", name:"Chaos Reaper", image:"assets/forms/dragon.png", evoOnly: true},
   cow:{ id:"cow", name:"Cow", image:"assets/forms/dragon.png", evoAlt:"cowman_evo"},
   cowman_evo:{ id:"cowman_evo", name:"Cowman", image:"assets/forms/dragon.png", evoOnly: true},
   milkytank_evo:{ id:"milkytank_evo", name:"Milky Tank", image:"assets/forms/dragon.png", evoOnly: true},
-  nulltation:{ id:"nulltation", name:"Nulltation", image:"assets/forms/dragon.png"},
-  fire_elemental:{ id:"fire_elemental", name:"Fire Elemental", image:"assets/forms/dragon.png"},
-
-  // --- Forms referenced by recipes that were previously undefined ---
-  tree:{ id:"tree", name:"Tree", image:"assets/forms/dragon.png" },
-  treesap:{ id:"treesap", name:"Tree Sap", image:"assets/forms/dragon.png" },
-  vampirelord:{ id:"vampirelord", name:"Vampire Lord", image:"assets/forms/dragon.png" },
-  domius:{ id:"domius", name:"Domius", image:"assets/forms/dragon.png" },
-  something:{ id:"something", name:"Something", image:"assets/forms/dragon.png" }
+  nulltaion:{ id:"nulltaion", name:"Nulltation", image:"assets/forms/dragon.png"},
+  fire_elemental:{ id:"fire_elemental", name:"Fire Elemental", image:"assets/forms/dragon.png"}
 };
