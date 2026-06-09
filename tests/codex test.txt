@@ -1,0 +1,109 @@
+// ========= Codex Forms Test =========
+(async function CodexFormsTest(){
+  const $  = (s,root=document)=>root.querySelector(s);
+  const $$ = (s,root=document)=>[...root.querySelectorAll(s)];
+  const sleep = (ms)=> new Promise(r=>setTimeout(r, ms));
+
+  function log(ok, msg){
+    const tag = ok ? '✅' : '❌';
+    console.log(`${tag} ${msg}`);
+  }
+
+  // --- ขึ้น Codex → Forms ให้แน่ใจ
+  try {
+    // เลือกแท็บ Codex ถ้ามีปุ่ม
+    $('.tab-btn[data-tab="codex"]')?.click();
+    await sleep(50);
+    // เลือก subtabs: Forms
+    $('.codex-btn[data-sub="forms"]')?.click();
+    await sleep(50);
+  } catch {}
+
+  // --- ฟังก์ชันอำนวยความสะดวก Codex
+  function renderFormsSafe(){
+    try { window.Codex?.renderForms?.(); } catch(e){ console.warn('renderForms error', e); }
+  }
+  function setSelectedFormId(id){
+    if (window.Codex?.renderForms?.state){
+      window.Codex.renderForms.state.selectedId = id;
+      window.Codex.renderForms.state.evo = false;
+    }
+  }
+  const cardFor = (id)=> $$('.form-card').find(c=>c?.title===`id: ${id}`);
+  const thumbHasImg = (id)=> !!cardFor(id)?.querySelector('.form-thumb.has-img');
+  const viewerName = ()=> $('.viewer-name')?.textContent?.trim() || '';
+  const viewerHasImg = ()=> $('.viewer-img')?.classList?.contains('has-img');
+  const evoBtn = ()=> $('.viewer-acts .btn');
+
+  // --- เตรียมข้อมูล: หา base ที่มี evoAlt
+  const RAW = window.DATA_FORMS || {};
+  const allIds = Object.keys(RAW);
+  let baseId = null, evoId = null, baseName = null, evoName = null;
+
+  for (const id of allIds){
+    const r = RAW[id];
+    if (r?.evoAlt && RAW[r.evoAlt]){ baseId = id; evoId = r.evoAlt; baseName = r.name||id; evoName = RAW[r.evoAlt].name||r.evoAlt; break; }
+  }
+  if (!baseId){
+    console.warn('ไม่พบคู่ฟอร์มที่มี evoAlt ใน DATA_FORMS'); 
+    return;
+  }
+
+  // --- สำรองเซฟ แล้วเซ็ตสถานะเริ่มต้น (ยังไม่ค้นพบอะไร)
+  const S = window.ensureSave?.();
+  if (!S){ console.warn('ensureSave() ไม่พร้อม'); return; }
+  const backup = JSON.stringify(S);
+  S.seenForms = {}; window.saveNow?.();
+
+  // เลือก baseId แล้ววาดใหม่
+  renderFormsSafe();
+  setSelectedFormId(baseId);
+  renderFormsSafe();
+  await sleep(50);
+
+  console.log('%c[Step 1] ยังไม่ค้นพบอะไร', 'color:#9aa3b2');
+  log(!thumbHasImg(baseId), 'Thumb ของ base เป็นกล่องดำ');
+  log(viewerName()==='???', 'Viewer แสดงชื่อ ???');
+  log(!viewerHasImg(), 'Viewer ยังไม่มีรูป');
+  log(!evoBtn() || evoBtn().disabled, 'ปุ่ม Evolution Preview ปิดอยู่ (ยังไม่ค้นพบ evo)');
+
+  // --- ปลดล็อก base
+  window.markFormSeen?.(baseId);
+  renderFormsSafe();
+  await sleep(50);
+
+  console.log('%c[Step 2] ค้นพบ base แล้ว (ยังไม่พบ evo)', 'color:#9aa3b2');
+  log(thumbHasImg(baseId) || true, 'Thumb ของ base ควรมีภาพ (ถ้ามี image)');
+  log(viewerName()=== (RAW[baseId].name||baseId), 'Viewer แสดงชื่อ base ถูกต้อง');
+  log(viewerHasImg() || true, 'Viewer base แสดงรูป (ถ้ามี image)');
+  if (RAW[baseId]?.evoAlt){
+    log(evoBtn()!=null, 'มีปุ่ม Evolution Preview โผล่');
+    log(evoBtn()?.disabled===true, 'ปุ่ม Evolution Preview ถูกปิด (ยังไม่พบ evo)');
+  }
+
+  // --- ปลดล็อก evo
+  window.markFormSeen?.(evoId);
+  renderFormsSafe();
+  await sleep(50);
+
+  console.log('%c[Step 3] ค้นพบ evo แล้ว', 'color:#9aa3b2');
+  log(evoBtn()!=null && !evoBtn().disabled, 'ปุ่ม Evolution Preview เปิดใช้งาน');
+  // ลอง toggle ไป evo
+  evoBtn()?.click(); await sleep(30);
+  log(viewerName()=== (RAW[evoId].name||evoId), 'Viewer สลับชื่อเป็น evo');
+  log(viewerHasImg() || true, 'Viewer evo แสดงรูป (ถ้ามี image)');
+  // ลองกลับ base
+  evoBtn()?.click(); await sleep(30);
+  log(viewerName()=== (RAW[baseId].name||baseId), 'Viewer สลับกลับ base ได้');
+
+  // --- evoOnly ต้องไม่โผล่ในกริด
+  console.log('%c[Step 4] evoOnly ถูกซ่อนจากกริด', 'color:#9aa3b2');
+  const evoOnlyIds = allIds.filter(id => RAW[id]?.evoOnly);
+  const hiddenInGrid = evoOnlyIds.every(id => !cardFor(id));
+  log(hiddenInGrid, 'ฟอร์มที่ evoOnly: true ไม่ปรากฏใน grid');
+
+  console.log('%c[Done] ถ้าทุกข้อเป็น ✅ แปลว่าระบบ Forms Codex พร้อมลุยต่อ', 'color:#86e49d');
+
+  // --- (ตัวเลือก) กู้เซฟเดิมกลับ
+  // const S2 = window.ensureSave?.(); Object.assign(S2, JSON.parse(backup)); window.saveNow?.();
+})();

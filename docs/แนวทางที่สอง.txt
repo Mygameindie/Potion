@@ -1,0 +1,140 @@
+จัดให้ครับ—นี่คือ สรุปสิ่งที่จะแก้/เพิ่ม สำหรับฐาน PoE v4.4.1 แยกเป็นลำดับความสำคัญและไฟล์เป้าหมายแบบตรงจุด
+
+
+---
+
+A. ด่วน/วิกฤต (กันบั๊กตุบ)
+
+เป้าหมาย: ให้สูตร–คีย์เวิร์ด–ฟอร์ม “เชื่อมติด” ทุกตัว
+
+data_keywords.js
+
+เพิ่มคีย์เวิร์ดที่สูตรเรียกใช้แต่ “ยังไม่มี”: tree, grow, potion, gravity, sun
+
+เพิ่ม synonym ให้ human: รวม "man", "men", "person"
+
+
+data_recipes.js
+
+เปลี่ยน {cup:"man"} → {cup:"human"} ในสูตร reaper
+
+แก้สะกดสูตร/ผลลัพธ์: ใช้ id:"nulltation" (หรือคง id เดิมแล้วแก้ toForm:"nulltation")
+
+
+data_forms.js
+
+เติมฟอร์มที่ถูกอ้างถึงแต่ยังไม่มี: something, domius, nulltation (ใช้ภาพ placeholder ไปก่อน)
+
+
+
+
+---
+
+B. Engine – เสถียร/อ่านง่าย/ขยายได้
+
+src/engine/adapter.js
+
+pass-through window.lookback จาก data → engine (รองรับสูตรที่ใช้ lookback)
+
+
+src/engine/chain.js
+
+จัดการ comparator ให้ “รวมศูนย์”: ใช้ chooseBest() กับ candidate หลายตัว หรือ ลบ chooseBest/scoreRecipe ถ้าไม่ใช้จริง เพื่อลดสับสน
+
+
+src/engine/overlay.js
+
+ใส่ scroll-lock (body{overflow:hidden} ระหว่างเปิด overlay) + focus trap (Tab ลูปในไดอะล็อก)
+
+
+src/engine/save.js
+
+เผย SAVE_KEY กลาง (เช่น window.SAVE_KEY='poe_v45_save') เพื่อให้ไฟล์ UI อ้างอิงเดียวกัน
+
+
+
+
+---
+
+C. UI/UX – โพลิชแบบไม่แตะเมคานิก
+
+src/ui/app.js
+
+ทำ appendLog ให้ ปลอดภัยเป็นค่าเริ่มต้น (ใช้ textContent) และเพิ่ม appendLogHTML() สำหรับเคสที่ตั้งใจแสดง HTML
+
+
+src/ui/brew.js
+
+เมื่อ brew ไม่พบคีย์เวิร์ด: เคลียร์ __LAST_BREW_HITS__ และ drink.disabled = true กัน “ดื่มของเก่าค้าง”
+
+หลัง drink() สำเร็จ: input.focus() เพื่อให้พิมพ์ต่อได้ลื่น
+
+ใส่ debounce event ปุ่ม Brew/Drink ~150–200ms กันกดรัว
+
+เมื่อผู้เล่นพิมพ์ (input): ล้างข้อความแจ้งเตือนเดิม และปิดปุ่ม Drink จนกว่าจะ brew ใหม่
+
+
+index.html (เลเยอร์หน้า)
+
+เพิ่ม meta/a11y: theme-color, color-scheme, aria-*
+
+Keybindings เบื้องต้น: Enter = Brew/Drink, Esc = ปิด overlay
+
+(ถ้าต้องการ) Sticky action bar บนมือถือ (ปุ่มหลักขนาดแตะง่าย)
+
+
+
+
+---
+
+D. Validator – ขยายคำเตือนที่ช่วยดีบั๊ก
+
+src/engine/recipe_validator.js
+
+เตือนกรณี window.lookback < requires.length เมื่อ contiguous=false
+
+รายงานรายละเอียด “dead-end by denyKeywords” (ระบุคัพที่ชน) เพื่อหาสาเหตุไวขึ้น
+
+
+
+
+---
+
+E. QoL & Easter Eggs (ตามแผนระยะสั้น)
+
+Theme switch (Light/Dark/Arcane) ด้วย CSS variables + จำค่าใน localStorage
+
+Toast สั้น ๆ (success/info/warn) ไม่บังปุ่มหลัก
+
+History ล่าสุด 5–10 รายการ (กดเพื่อคัดลอกกลับไป input)
+
+Sound toggle (SFX เบา ๆ ตอน Brew/Evo/Ending)
+
+Debug panel (Alt+D): form ปัจจุบัน / last kw / match ชื่อสูตร/อีโว/เอนดิง
+
+Easter Eggs ชุดแรก: coffee, zero, horu, elra (flavor เท่านั้น), Konami Code → ธีมพิเศษ, Rare Ending “Night Brew” (เงื่อนไขเวลา+คำ)
+
+
+
+---
+
+F. เช็กลิสต์ทดสอบหลังแพตช์
+
+สูตรที่ปรับ/คีย์เวิร์ดใหม่ “ติดจริง”: reaper, nulltation, สาย sun กับ vampire/phoenix
+
+Brew ผิด → Drink ไม่ทำงาน/ไม่กินของเก่า, แจ้งเตือนหายเมื่อพิมพ์ใหม่
+
+Overlay เปิดแล้วหน้าไม่เลื่อน, Tab ไม่หลุดออกจากไดอะล็อก, Esc ปิดได้
+
+Enter ทำงาน: ถ้า Drink ใช้ได้ → ดื่ม, ไม่งั้น → Brew
+
+Quick save/reset ฝั่ง UI ใช้ window.SAVE_KEY เดียวกับ engine
+
+Validator ออกคำเตือน lookback/deny ที่ตั้งใจไว้
+
+
+
+---
+
+ถ้าโอเคตามนี้ ผมพร้อมส่ง แพตช์โค้ดไฟล์จริง ตามรายการ A–C ได้ทันที (ยึด 4.4.1 เดิม ไม่เปลี่ยนเมคานิก) หรือถ้าจะล็อกเฉพาะบางข้อก่อน ก็บอกลำดับที่อยากให้เริ่มได้เลยครับ.
+

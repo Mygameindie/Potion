@@ -1,0 +1,150 @@
+// ============ Codex Summary Bar Test ============
+// ใช้ใน DevTools Console บนหน้าเกม
+
+(async function testCodexSummary(){
+  const $  = (s,root=document)=>root.querySelector(s);
+  const $$ = (s,root=document)=>[...root.querySelectorAll(s)];
+  const sleep = (ms)=> new Promise(r=>setTimeout(r, ms));
+  const log = (ok, msg)=> console.log((ok?'✅':'❌') + ' ' + msg);
+
+  // --- เตรียม env/ฟังก์ชันที่ต้องใช้ ---
+  if (!window.ensureSave || !window.Codex?.renderSummaryBar){
+    console.warn('ensureSave() หรือ Codex.renderSummaryBar() ยังไม่พร้อม');
+    return;
+  }
+
+  // ไปที่แท็บ Codex เพื่อให้มี host #codex-summary
+  $('.tab-btn[data-tab="codex"]')?.click();
+  await sleep(50);
+
+  // สำรองเซฟ
+  const S = window.ensureSave();
+  const backup = JSON.stringify(S);
+
+  // helper: เคลียร์สถานะ และเคลียร์ counters
+  function resetDiscovery(){
+    const S = window.ensureSave();
+    S.seenKeywords = {};
+    S.seenForms    = {};
+    S.seenEndings  = {};
+    S.counters = {
+      keywordsDiscovered: 0,
+      formsDiscovered: 0,
+      endingsDiscovered: 0,
+      evolutionsDiscovered: 0
+    };
+    window.saveNow?.();
+  }
+
+  // helper: อ่านตัวเลขจากแถบสรุป
+  function readSummary(){
+    const el = $('#codex-summary');
+    if (!el) return null;
+    // รูปแบบที่เราวาด: 
+    // Keywords <b>X</b> / Y • Forms <b>A</b> / B • Endings <b>C</b> / D • Evolutions <b>E</b>
+    const txt = el.textContent.replace(/\s+/g,' ').trim();
+    const m = txt.match(/Keywords\s+(\d+)\s*\/\s*(\d+).*Forms\s+(\d+)\s*\/\s*(\d+).*Endings\s+(\d+)\s*\/\s*(\d+).*Evolutions\s+(\d+)/i);
+    if (!m) return null;
+    return {
+      Kx:+m[1], Ky:+m[2],
+      Fx:+m[3], Fy:+m[4],
+      Ex:+m[5], Ey:+m[6],
+      Evo:+m[7]
+    };
+  }
+
+  // helper: รวมยอดทั้งหมดจาก data (ให้ตรงกับ getDiscoverySummary)
+  function totalsFromData(){
+    const totalKeywords = Array.isArray(window.DATA_KEYWORDS) ? window.DATA_KEYWORDS.filter(Boolean).length : 0;
+    const totalForms = Array.isArray(window.DATA_FORMS)
+      ? window.DATA_FORMS.filter(Boolean).length
+      : (window.DATA_FORMS ? Object.keys(window.DATA_FORMS).length : 0);
+    const totalEndings = Array.isArray(window.DATA_ENDINGS_NEW)
+      ? window.DATA_ENDINGS_NEW.filter(Boolean).length
+      : (window.DATA_ENDINGS ? Object.keys(window.DATA_ENDINGS).length : 0);
+    return { totalKeywords, totalForms, totalEndings };
+  }
+
+  // เริ่มทดสอบ
+  console.log('%c[Step 0] Reset & render summary', 'color:#9aa3b2');
+  resetDiscovery();
+  window.Codex.renderSummaryBar();
+  await sleep(30);
+
+  const T = totalsFromData();
+  let sum = readSummary();
+  log(!!sum, 'summary แสดงผลแล้ว');
+  if (!sum){ console.warn('summary ไม่ขึ้น'); return; }
+
+  log(sum.Kx===0 && sum.Fx===0 && sum.Ex===0 && sum.Evo===0, 'เริ่มต้นค่าที่ค้นพบ = 0 ทั้งหมด');
+  log(sum.Ky===T.totalKeywords && sum.Fy===T.totalForms && sum.Ey===T.totalEndings, 'ตัวหาร (ทั้งหมด) ตรงกับ data');
+
+  // เลือกตัวอย่างจาก data: keyword/form/evo/ending
+  const KW = (Array.isArray(DATA_KEYWORDS) ? DATA_KEYWORDS : []).map(k=>k.id).filter(Boolean);
+  const kw1 = KW[0];
+
+  const FORMS = window.DATA_FORMS || {};
+  // หา base ที่มี evoAlt เพื่อทดสอบ evolutionsDiscovered
+  let baseId=null, evoId=null;
+  for (const bid in FORMS){
+    if (FORMS[bid]?.evoAlt && FORMS[FORMS[bid].evoAlt]){ baseId=bid; evoId=FORMS[bid].evoAlt; break; }
+  }
+  // ending ใดก็ได้
+  const END_ARR = Array.isArray(window.DATA_ENDINGS_NEW) ? window.DATA_ENDINGS_NEW : [];
+  const end1 = END_ARR[0]?.id;
+
+  console.log('%c[Step 1] Mark 1 keyword', 'color:#9aa3b2');
+  if (kw1){
+    window.markKeywordSeen?.(kw1);
+    window.Codex.renderSummaryBar(); await sleep(20);
+    sum = readSummary();
+    log(sum.Kx===1, 'keywordsDiscovered = 1');
+  }else{
+    console.warn('ไม่มีคีย์เวิร์ดใน DATA_KEYWORDS — ข้ามเคสนี้');
+  }
+
+  console.log('%c[Step 2] Mark 1 base form', 'color:#9aa3b2');
+  if (baseId){
+    window.markFormSeen?.(baseId);
+    window.Codex.renderSummaryBar(); await sleep(20);
+    sum = readSummary();
+    log(sum.Fx>=1, 'formsDiscovered เพิ่มขึ้นอย่างน้อย 1');
+    const evoWas = sum.Evo;
+    console.log('evolutionsDiscovered(before):', evoWas);
+
+    if (evoId){
+      console.log('%c[Step 3] Mark its evo form (first time)', 'color:#9aa3b2');
+      window.markFormSeen?.(evoId);
+      window.Codex.renderSummaryBar(); await sleep(20);
+      sum = readSummary();
+      log(sum.Evo===evoWas+1, 'evolutionsDiscovered เพิ่มขึ้น 1 เมื่อค้นพบร่างอีโวครั้งแรก');
+    }
+  }else{
+    console.warn('ไม่พบคู่ base/evo ใน DATA_FORMS — ข้ามเคส evolution');
+  }
+
+  console.log('%c[Step 4] Mark 1 ending', 'color:#9aa3b2');
+  if (end1){
+    window.markEndingSeen?.(end1);
+    window.Codex.renderSummaryBar(); await sleep(20);
+    sum = readSummary();
+    log(sum.Ex>=1, 'endingsDiscovered เพิ่มขึ้นอย่างน้อย 1');
+  }else{
+    console.warn('ไม่มี ending ใน DATA_ENDINGS_NEW — ข้ามเคสนี้');
+  }
+
+  console.log('%c[Step 5] Idempotency (mark ซ้ำไม่ควรเพิ่ม)', 'color:#9aa3b2');
+  const before = { Kx:sum.Kx, Fx:sum.Fx, Ex:sum.Ex, Evo:sum.Evo };
+  if (kw1)  window.markKeywordSeen?.(kw1);
+  if (baseId) window.markFormSeen?.(baseId);
+  if (evoId)  window.markFormSeen?.(evoId);
+  if (end1)   window.markEndingSeen?.(end1);
+  window.Codex.renderSummaryBar(); await sleep(20);
+  sum = readSummary();
+  log(sum.Kx===before.Kx && sum.Fx===before.Fx && sum.Ex===before.Ex && sum.Evo===before.Evo, 'การ mark ซ้ำ “ครั้งแรกเท่านั้น” จึงไม่เพิ่มตัวเลข');
+
+  console.log('%c[Done] ถ้าข้อความส่วนใหญ่เป็น ✅ แปลว่าแถบสรุปทำงานถูกต้อง', 'color:#86e49d');
+
+  // (ตัวเลือก) กู้เซฟกลับ
+  // Object.assign(window.ensureSave(), JSON.parse(backup)); window.saveNow?.();
+})();

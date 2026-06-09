@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PoE v4.5 (clean core)</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="ui.css" />
+  <link rel="stylesheet" href="animation.css">
+</head>
+<body>
+  <header class="top" role="banner">
+  <div class="brand">
+    <div class="logo" aria-hidden="true"></div>
+    <h1>PoE</h1>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Main Tabs">
+    <button class="tab-btn" role="tab" aria-selected="true"  data-tab="brew">Brew</button>
+    <button class="tab-btn" role="tab" aria-selected="false" data-tab="codex">Codex</button>
+    <button class="tab-btn" role="tab" aria-selected="false" data-tab="settings">Settings</button>
+  </nav>
+</header>
+
+  <main class="wrap">
+    <!-- BREW -->
+      <section id="tab-brew" class="panel" role="tabpanel">
+    <div class="brew-grid">
+      <div class="card">
+        <p class="title">Current Form</p>
+        <div class="form-box">
+          <div class="form-img" id="stFormImg">IMG</div>
+          <div class="form-name" id="stForm">human</div>
+        </div>
+      </div>
+      <div class="brew-box">
+        <div class="card">
+          <p class="title">Brew</p>
+          <div class="input-row">
+            <input id="labelInput" placeholder="Type any word… e.g. flame, death" autocomplete="off" />
+            <button class="btn primary" id="brewBtn">Brew</button>
+            <button class="btn ok" id="drinkBtn" disabled>Drink</button>
+          </div>
+          <div id="resultBox" class="muted" style="margin-top:8px">—</div>
+        </div>
+        <div class="card">
+          <p class="title">Log</p>
+          <div class="log-box" id="log" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Codex -->
+  <section id="tab-codex" class="panel" role="tabpanel" hidden>
+  <div id="codex-summary" class="codex-summary-bar"></div>
+  <div class="codex-tabs" role="tablist" aria-label="Codex Tabs">
+    <button class="codex-btn" role="tab" aria-selected="true" data-sub="kw">Keywords</button>
+    <button class="codex-btn" role="tab" aria-selected="false" data-sub="forms">Forms</button>
+    <button class="codex-btn" role="tab" aria-selected="false" data-sub="endings">Endings</button>
+  </div>
+  <div id="codex-content"></div>
+</section>
+
+  <!-- Settings -->
+  <section id="tab-settings" class="panel" role="tabpanel" hidden>
+  <div class="card danger">
+    <p class="title">Danger Zone</p>
+    <button class="btn danger" id="btnReset">Hard Reset</button>
+  </div>
+
+  <div class="card">
+    <p class="title">Display & Accessibility</p>
+    <label class="row"><input type="checkbox" id="setCompact"> Compact UI</label>
+    <label class="row"><input type="checkbox" id="setContrast"> High Contrast</label>
+    <label class="row"><input type="checkbox" id="setInstant"> Instant Overlays</label>
+    <label class="row"><input type="checkbox" id="setAutoScroll"> Auto-scroll Log</label>
+  </div>
+
+  <div class="card">
+    <p class="title">Credits</p>
+    <div class="muted">Potion of Everything — UI v1</div>
+  </div>
+  <!-- STATE -->
+    <section class="card">
+      <h2>State</h2>
+      <div>Form: <b id="stForm">human</b></div>
+      <div>Buffer: <span id="stBuffer" class="mono">—</span></div>
+      <div>Outcome: <span id="stOutcome">—</span></div>
+      <div class="btns">
+        <button id="btnClearBuf">Clear Buffer</button>
+        <button id="btnReset">Hard Reset</button>
+      </div>
+    </section>
+    
+    <!-- === Brew Defaults === -->
+<div class="card">
+  <p class="title">Brew Defaults</p>
+
+  <div class="row">
+    <label for="setDefaultWord">Default Brew Word</label><br>
+    <input id="setDefaultWord" type="text" placeholder="เช่น flame frost" style="width:100%;max-width:420px">
+    <p class="muted" style="margin:6px 0 0">
+      ถ้าช่อง Brew ว่างอยู่ เมื่อกด Brew จะใช้คำนี้อัตโนมัติ (ปุ่มลัด “Brew default” ก็อ่านจากค่านี้)
+    </p>
+  </div>
+</div>
+
+</section>
+
+  <!-- Overlay -->
+<div id="overlay" class="overlay hidden" aria-modal="true" role="dialog">
+  <div class="overlay-card">
+    <img id="overlayImage" class="overlay-img" alt="" />
+    <div id="overlayTitle" class="overlay-title"></div>
+    <div id="overlayDesc" class="overlay-desc"></div>
+    <div class="overlay-actions" id="overlayActions"></div>
+    <button id="overlayClose" class="overlay-close">×</button>
+  </div>
+</div>
+  
+  <!-- (ไม่บังคับ) bottom tabs -->
+<!--
+<nav class="bottom-tabs" role="tablist" aria-label="Main Tabs (Bottom)">
+  <button class="tab-btn" role="tab" aria-selected="true"  data-tab="brew">Brew</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-tab="codex">Codex</button>
+  <button class="tab-btn" role="tab" aria-selected="false" data-tab="settings">Settings</button>
+</nav>
+-->
+
+  <!-- Data ของคุณ -->
+  <script defer src="data/data_keywords.js"></script>
+  <script defer src="data/data_forms.js"></script>
+  <script defer src="data/data_endings_new.js"></script>
+  <script defer src="data/data_recipes.js"></script>
+
+  <!-- Engine -->
+  <script defer src="src/engine/save.js"></script>
+  <script defer src="src/engine/overlay.js"></script>
+  <script defer src="src/engine/chain.js"></script>
+  <script defer src="src/engine/adapter.js"></script>
+  <script defer src="src/engine/recipe_validator.js"></script>
+<script>
+  // ให้แน่ใจว่าเรียกหลังจาก adapter set window.RECIPES แล้ว
+  document.addEventListener('DOMContentLoaded', ()=>{
+    if (window.RECIPES) RecipeValidator.run(window.RECIPES);
+  });
+</script>
+  <!-- UI -->
+  <script defer src="src/ui/app.js"></script>
+  <script defer src="src/ui/codex.js"></script>
+  <script defer src="src/ui/brew.js"></script>
+  <script defer src="src/ui/settings.js"></script>
+  <script defer src="src/ui/animation.js"></script>
+</body>
+</html>

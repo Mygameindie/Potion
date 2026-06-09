@@ -1,0 +1,76 @@
+:root{
+  --bg:#111; --card:#1b1b1b; --text:#f5f5f5; --muted:#aaa; --accent:#ff1f7a;
+  --r:12px; --m:12px; --l:20px;
+  font-family: system-ui, "Noto Sans Thai", sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text)}
+.topbar{padding:10px 16px;border-bottom:1px solid #222}
+.wrap{display:grid;gap:16px;padding:16px;grid-template-columns:1fr}
+@media(min-width:900px){.wrap{grid-template-columns:1fr 1fr 1fr}}
+.card{background:var(--card);border-radius:var(--r);padding:var(--l);box-shadow:0 4px 12px rgba(0,0,0,.45)}
+.brew-row{display:flex;gap:8px}
+.brew-row input{flex:1;padding:10px;border-radius:10px;border:0}
+button{padding:10px 14px;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.result{margin-top:8px;color:var(--muted)}
+.log{max-height:40vh;overflow:auto;border:1px solid #333;border-radius:10px;padding:8px}
+.log > div{padding:2px 0;border-bottom:1px dashed #333}
+.mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+.btns{display:flex;gap:8px;margin-top:8px}
+
+/* Overlay */
+.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6)}
+.hidden{display:none}
+.overlay-card{width:min(92vw,520px);background:#000;border:3px solid #fff;border-radius:18px;padding:16px;position:relative}
+.overlay-img{width:100%;height:240px;object-fit:contain;background:#111;border-radius:10px}
+.overlay-title{font-size:22px;font-weight:800;margin:8px 0}
+.overlay-desc{opacity:.9;margin-bottom:8px}
+.overlay-actions{display:flex;gap:8px;flex-wrap:wrap}
+.overlay-close{position:absolute;top:8px;right:8px;width:40px;height:40px;border-radius:50%;background:#222}
+
+
+/* Settings layout */
+#tab-settings .row { display:block; margin:6px 0; }
+
+/* Compact */
+.compact-ui body { font-size: 0.92em; }
+.compact-ui .viewer-img { height: clamp(200px, 30vh, 360px); }
+
+/* High contrast */
+.high-contrast body { background:#000; color:#fff; }
+.high-contrast .muted { color:#9ad; }
+
+/* Instant overlays: ถ้าเคยมีทรานซิชัน ก็ปิดทิ้ง */
+.instant-overlay #overlay { transition: none !important; }
+
+
+/* ===== Overlay: enter/exit ===== */
+@keyframes ovPopIn   { from{opacity:0; transform:scale(.96)} to{opacity:1; transform:scale(1)} }
+@keyframes ovPopOut  { from{opacity:1; transform:scale(1)}   to{opacity:0; transform:scale(.98)} }
+.overlay-card.anim-in  { animation: ovPopIn .28s ease both; }
+.overlay-card.anim-out { animation: ovPopOut .18s ease both; }
+
+/* ===== Endings: Ken Burns ที่รูปด้านบน ===== */
+@keyframes kenburns { from{transform:scale(1)} to{transform:scale(1.08)} }
+.overlay-card .ov-img.kenburns { animation: kenburns 5s ease forwards; }
+
+/* ===== Evolution: pulse ม่านดำสั้น ๆ ===== */
+@keyframes pulseDark { 0%,100%{opacity:.75} 50%{opacity:.9} }
+#fadeCurtain.pulse { animation: pulseDark 600ms ease 3; }
+
+/* ===== Mini progress bar (มีลายวิ่ง) ===== */
+@keyframes progressStripe { to { background-position: 30px 0; } }
+.miniBar { height:10px; border-radius:999px; background:#20232a; overflow:hidden; }
+.miniBar .fill{
+  height:100%;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 15px, rgba(255,255,255,.28) 15px 30px), #5865f2;
+  background-size:30px 100%, auto;
+  animation: progressStripe .8s linear infinite;
+  width:0%;
+  transition: width .2s linear;
+}
+
+/* ===== Game Over: ปุ่มเด้งเล็กน้อยตอนโผล่ ===== */
+@keyframes btnAttention { 0%{transform:scale(1)} 30%{transform:scale(1.06)} 100%{transform:scale(1)} }
+#gameOver #goContinue.appear { animation: btnAttention .45s ease .1s both; }
