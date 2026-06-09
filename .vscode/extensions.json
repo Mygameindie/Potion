@@ -1,0 +1,6 @@
+{
+  "// note": "github.dev/vscode.dev will offer to install these when you open the repo. Live Preview lets you preview Main/index.html inside the editor.",
+  "recommendations": [
+    "ms-vscode.live-server"
+  ]
+}

@@ -7,11 +7,31 @@ build step, no server required.
 ## ▶️ Preview it without publishing
 
 GitHub shows `.html` files as **source text** and won't run the game in the file
-viewer (that needs GitHub Pages). To see it actually running straight from this
-branch — **without deploying anything** — open one of these live-preview proxies:
+viewer (that needs GitHub Pages).
 
-- **raw.githack (recommended)** — serves the real files, so all scripts and
-  images load correctly:
+### Option A — Open in github.dev (press `.`)
+
+`github.dev` (and `vscode.dev`) is an in-browser editor with **no server/compute**,
+so it can't host the running game by itself. Two ways to preview from inside it:
+
+1. **Live Preview extension (runs the game inside the editor).**
+   When you open the repo, github.dev will offer to install the recommended
+   **Live Preview** extension (see `.vscode/extensions.json`). Install it, open
+   `Main/index.html`, then click the **"Show Preview"** icon (top-right) or run
+   *Live Preview: Show Preview* from the Command Palette (`F1`). It serves the
+   static files in-browser, so the scripts and images load. *(If your github.dev
+   session can't run the extension on the virtual filesystem, use option 2 or a
+   Codespace.)*
+
+2. **Simple Browser tab (no extension needed).**
+   Command Palette (`F1`) → **"Simple Browser: Show"** → paste the live link
+   below. The game opens in a tab right inside github.dev.
+
+### Option B — Live link (works anywhere, no install)
+
+These proxies fetch the files from this branch on demand — nothing is published:
+
+- **raw.githack (recommended)** — serves real files, so all scripts/images load:
 
   👉 https://raw.githack.com/Mygameindie/Potion/claude/zip-extract-organize-ediwt4/Main/index.html
 
@@ -19,9 +39,8 @@ branch — **without deploying anything** — open one of these live-preview pro
 
   👉 https://htmlpreview.github.io/?https://github.com/Mygameindie/Potion/blob/claude/zip-extract-organize-ediwt4/Main/index.html
 
-These services fetch the files from this repo on demand. Nothing is published,
-and the links keep working as long as the branch exists. If you merge this into
-`main`, swap `claude/zip-extract-organize-ediwt4` for `main` in the URL.
+If you merge this into `main`, swap `claude/zip-extract-organize-ediwt4` for
+`main` in the URLs above.
 
 > Note: progress is saved in the browser's `localStorage`, so each preview
 > domain keeps its own separate save.
