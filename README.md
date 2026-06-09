@@ -1,5 +1,11 @@
 # Potion of Everything (PoE)
 
+### [▶ &nbsp;PLAY NOW](https://raw.githack.com/Mygameindie/Potion/claude/zip-extract-organize-ediwt4/Main/index.html)
+
+[![Play Now](https://img.shields.io/badge/%E2%96%B6%20PLAY%20NOW-Click%20to%20play-2ea44f?style=for-the-badge)](https://raw.githack.com/Mygameindie/Potion/claude/zip-extract-organize-ediwt4/Main/index.html)
+
+👆 Click to play instantly in your browser — nothing to install or publish.
+
 A small browser game: type any word, brew it into a potion, drink it, and
 transform / evolve / meet an ending. Pure static HTML + CSS + JavaScript — no
 build step, no server required.
