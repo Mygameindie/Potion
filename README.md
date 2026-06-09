@@ -1,10 +1,15 @@
 # Potion of Everything (PoE)
 
-### [▶ &nbsp;PLAY NOW](https://raw.githack.com/Mygameindie/Potion/claude/zip-extract-organize-ediwt4/Main/index.html)
+[![Play on GitHub Pages](https://img.shields.io/badge/%E2%96%B6%20PLAY%20NOW-GitHub%20Pages-2ea44f?style=for-the-badge)](https://mygameindie.github.io/Potion/)
+&nbsp;
+[![Play via githack](https://img.shields.io/badge/%E2%96%B6%20Play-githack%20(branch)-555?style=for-the-badge)](https://raw.githack.com/Mygameindie/Potion/claude/zip-extract-organize-ediwt4/Main/index.html)
 
-[![Play Now](https://img.shields.io/badge/%E2%96%B6%20PLAY%20NOW-Click%20to%20play-2ea44f?style=for-the-badge)](https://raw.githack.com/Mygameindie/Potion/claude/zip-extract-organize-ediwt4/Main/index.html)
+👆 **Click to play instantly in your browser.**
 
-👆 Click to play instantly in your browser — nothing to install or publish.
+- **PLAY NOW** → clean permanent link: **https://mygameindie.github.io/Potion/**
+  (goes live after the Pages workflow runs on `main` — see
+  [setup](#-permanent-link-github-pages) below).
+- **Play via githack** → works right now from this branch, nothing published.
 
 A small browser game: type any word, brew it into a potion, drink it, and
 transform / evolve / meet an ending. Pure static HTML + CSS + JavaScript — no
@@ -50,6 +55,20 @@ If you merge this into `main`, swap `claude/zip-extract-organize-ediwt4` for
 
 > Note: progress is saved in the browser's `localStorage`, so each preview
 > domain keeps its own separate save.
+
+## 🔗 Permanent link (GitHub Pages)
+
+For the clean one-click URL **https://mygameindie.github.io/Potion/**, the repo
+includes a Pages workflow (`.github/workflows/pages.yml`) that publishes the
+`Main/` folder. To turn it on (one time):
+
+1. Merge this branch into `main` (the workflow deploys from `main`).
+2. In the repo: **Settings → Pages → Build and deployment → Source: "GitHub
+   Actions"**.
+3. The **Deploy game to GitHub Pages** action runs and the link goes live. You
+   can also re-run it any time from the **Actions** tab (*Run workflow*).
+
+Until then, use the **githack** button above — it works immediately.
 
 ## 💻 Run it locally
 
