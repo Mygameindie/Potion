@@ -191,6 +191,7 @@ function getByIdAny(id){
     const img = document.createElement('div'); img.className = 'viewer-img';
     if (discovered && curMeta.image){
   const pic = document.createElement('img');
+  pic.loading = 'lazy'; pic.decoding = 'async';
   pic.src = curMeta.image;
   pic.alt = curMeta.name || curId;
   img.appendChild(pic);
@@ -263,6 +264,7 @@ function paintThumbs(host){
     thumb.className = 'form-thumb';
     if (discovered && it.image){
   const pic = document.createElement('img');
+  pic.loading = 'lazy'; pic.decoding = 'async';
   pic.src = it.image;
   pic.alt = it.name || it.id;
   thumb.appendChild(pic);
@@ -362,6 +364,7 @@ function renderEndings(){
     const img = document.createElement('div'); img.className = 'ending-img';
     if (meta.image){
   const pic = document.createElement('img');
+  pic.loading = 'lazy'; pic.decoding = 'async';
   pic.src = meta.image;
   pic.alt = meta.name || meta.id;
   img.appendChild(pic);
@@ -412,6 +415,7 @@ function renderEndings(){
       thumb.className = 'ending-thumb' + (it.image ? ' has-img' : '');
       if (it.image){
   const pic = document.createElement('img');
+  pic.loading = 'lazy'; pic.decoding = 'async';
   pic.src = it.image;
   pic.alt = it.name || it.id;
   thumb.appendChild(pic);

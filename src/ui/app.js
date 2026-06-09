@@ -56,8 +56,8 @@ function updateFormUI(){
     elImg.setAttribute('aria-label', displayName);
   }
 }
-  function renderBuffer(){ const b = window.Chain.getBuffer(); $('#stBuffer').textContent = b.length? b.join(' + ') : '—'; }
-  function setOutcome(msg){ $('#stOutcome').innerHTML = msg || '—'; }
+  function renderBuffer(){ const b = window.Chain.getBuffer(); const el = $('#stBuffer'); if (el) el.textContent = b.length? b.join(' + ') : '—'; }
+  function setOutcome(msg){ const el = $('#stOutcome'); if (el) el.innerHTML = msg || '—'; }
 
 // ========================
 // COUNTERS (First-time only)
@@ -261,28 +261,10 @@ function rerenderCodexIfViewingEndings(){
 
   // controls
   $('#btnClearBuf')?.addEventListener('click', ()=>{ window.Chain.resetBuffer(); renderBuffer(); setOutcome('—'); appendLog('<span class="mono">[clear buffer]</span>'); });
-  $('#btnReset')?.addEventListener('click', ()=>{
-    localStorage.removeItem('poe_full');
-    window.SAVE=null;
-
-    // 1) reset buffer + sync engine form
-    window.Chain.resetBuffer();
-    window.Chain.setForm('human');
-
-    // 2) new save baseline
-    window.ensureSave().form.id='human'; window.saveNow();
-
-    // 3) clear pending brew/drink state
-    window.__LAST_BREW_HITS__ = [];
-    document.getElementById('drinkBtn')?.setAttribute('disabled','true');
-    const _in = document.getElementById('labelInput'); if (_in) _in.value = '';
-
-    // 4) repaint
-    updateFormUI(); renderBuffer(); setOutcome('—');
-    appendLog('<span class="mono">[hard reset]</span>');
-  const codexVisible = !document.querySelector('#tab-codex')?.hidden;
-  if (codexVisible) window.Codex?.renderSummaryBar?.();
-});
+  // NOTE: Hard/Soft Reset (#btnReset) is handled in src/ui/settings.js via a
+  // single delegated click listener (with a confirm() guard). It used to be
+  // double-bound here with the wrong localStorage key ('poe_full'), which wiped
+  // the buffer even when the user cancelled the confirm dialog.
 
   // first paint
   window.ensureSave(); updateFormUI(); renderBuffer(); setOutcome('—');

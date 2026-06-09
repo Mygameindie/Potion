@@ -22,7 +22,7 @@ window.DATA_FORMS = {
   zombie:{ id:"zombie", name:"Zombie", image:"assets/forms/dragon.png"},
   reaper:{ id:"reaper", name:"Reaper", image:"assets/forms/dragon.png", evoAlt:"chain_reaper_evo"},
   chain_reaper_evo:{ id:"chain_reaper_evo", name:"Chained Reaper", image:"assets/forms/dragon.png", evoOnly: true},
-  chaos_reaper_evo:{ id:"chain_reaper_evo", name:"Chaos Reaper", image:"assets/forms/dragon.png", evoOnly: true},
+  chaos_reaper_evo:{ id:"chaos_reaper_evo", name:"Chaos Reaper", image:"assets/forms/dragon.png", evoOnly: true},
   cow:{ id:"cow", name:"Cow", image:"assets/forms/dragon.png", evoAlt:"cowman_evo"},
   cowman_evo:{ id:"cowman_evo", name:"Cowman", image:"assets/forms/dragon.png", evoOnly: true},
   milkytank_evo:{ id:"milkytank_evo", name:"Milky Tank", image:"assets/forms/dragon.png", evoOnly: true},
