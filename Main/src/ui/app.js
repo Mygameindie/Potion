@@ -1,9 +1,14 @@
 ;(function(){
   const $ = s=>document.querySelector(s);
+  const LOG_MAX = 200;
   function appendLog(msg){
     const box = $('#log'); if (!box) return;
     const d = document.createElement('div'); d.innerHTML = msg; box.appendChild(d);
-    box.scrollTop = box.scrollHeight;
+    // cap log size so the DOM doesn't grow unbounded over a long session
+    while (box.childElementCount > LOG_MAX) box.removeChild(box.firstChild);
+    // honour the "Auto-scroll Log" setting (default on)
+    const auto = window.getSetting ? window.getSetting('autoScrollLog') !== false : true;
+    if (auto) box.scrollTop = box.scrollHeight;
   }
   // --- helpers: อ่านข้อมูลฟอร์มจาก DATA_FORMS (รองรับทั้ง object/array) ---
 function getFormMeta(id){
@@ -35,10 +40,12 @@ function updateFormUI(){
   const displayName = displayMeta.name || displayMeta.id;
 
   const elName = document.getElementById('stForm');
+  const elNameState = document.getElementById('stFormState');
   const elImg  = document.getElementById('stFormImg');
 
   // ชื่อ: ใช้ชื่อของ displayMeta (ร่างฐานถ้ามี)
   if (elName) elName.textContent = displayName;
+  if (elNameState) elNameState.textContent = displayName;
 
   // รูป: ใช้รูปของ displayMeta (ร่างฐานถ้ามี)
   if (elImg){
@@ -106,7 +113,7 @@ window.markKeywordSeen = function markKeywordSeen(idOrIds){
   }
   if (changed){
     C.keywordsDiscovered = (C.keywordsDiscovered||0) + changed;
-    window.saveNow?.();
+    window.saveSoon?.();
 
     // 🔄 รีเฟรช Codex → Keywords และแถบสรุป ถ้ากำลังเปิดอยู่
     rerenderCodexIfViewingKeywords();
@@ -132,7 +139,7 @@ window.markFormSeen = function markFormSeen(formId){
     if (isEvoFormId(formId)){
       C.evolutionsDiscovered = (C.evolutionsDiscovered||0) + 1;
     }
-    window.saveNow?.();
+    window.saveSoon?.();
   }
 };
 
@@ -155,15 +162,13 @@ window.markEndingSeen = function markEndingSeen(endingId){
     e.times = (e.times||0) + 1;
     e.lastAt = now;
   }
-  window.saveNow?.();
+  window.saveSoon?.();
 };
 
 // (ตัวเลือก) utility อ่านสรุปรวมแบบเร็ว
-window.getDiscoverySummary = function getDiscoverySummary(){
-  const S = window.ensureSave?.() || {};
-  const C = window.ensureCounters?.() || {};
-
-  // รวมทั้งหมดจาก data
+let _totalsCache = null;
+function computeTotals(){
+  if (_totalsCache) return _totalsCache;
   const totalKeywords =
     Array.isArray(window.DATA_KEYWORDS) ? window.DATA_KEYWORDS.filter(Boolean).length : 0;
 
@@ -174,6 +179,24 @@ window.getDiscoverySummary = function getDiscoverySummary(){
   const totalEndings = Array.isArray(window.DATA_ENDINGS_NEW)
     ? window.DATA_ENDINGS_NEW.filter(Boolean).length
     : (window.DATA_ENDINGS ? Object.keys(window.DATA_ENDINGS).length : 0);
+
+  // cache only once the data scripts have actually loaded
+  if (totalKeywords || totalForms || totalEndings){
+    _totalsCache = { keywords: totalKeywords, forms: totalForms, endings: totalEndings };
+    return _totalsCache;
+  }
+  return { keywords: totalKeywords, forms: totalForms, endings: totalEndings };
+}
+
+window.getDiscoverySummary = function getDiscoverySummary(){
+  const S = window.ensureSave?.() || {};
+  const C = window.ensureCounters?.() || {};
+
+  // รวมทั้งหมดจาก data (cached — ค่าคงที่หลังโหลด)
+  const totals = computeTotals();
+  const totalKeywords = totals.keywords;
+  const totalForms    = totals.forms;
+  const totalEndings  = totals.endings;
 
   return {
     counters: {
@@ -260,29 +283,8 @@ function rerenderCodexIfViewingEndings(){
   window.updateFormUI = updateFormUI;
 
   // controls
+  // NOTE: #btnReset is handled centrally in settings.js (correct storage key + reload).
   $('#btnClearBuf')?.addEventListener('click', ()=>{ window.Chain.resetBuffer(); renderBuffer(); setOutcome('—'); appendLog('<span class="mono">[clear buffer]</span>'); });
-  $('#btnReset')?.addEventListener('click', ()=>{
-    localStorage.removeItem('poe_full');
-    window.SAVE=null;
-
-    // 1) reset buffer + sync engine form
-    window.Chain.resetBuffer();
-    window.Chain.setForm('human');
-
-    // 2) new save baseline
-    window.ensureSave().form.id='human'; window.saveNow();
-
-    // 3) clear pending brew/drink state
-    window.__LAST_BREW_HITS__ = [];
-    document.getElementById('drinkBtn')?.setAttribute('disabled','true');
-    const _in = document.getElementById('labelInput'); if (_in) _in.value = '';
-
-    // 4) repaint
-    updateFormUI(); renderBuffer(); setOutcome('—');
-    appendLog('<span class="mono">[hard reset]</span>');
-  const codexVisible = !document.querySelector('#tab-codex')?.hidden;
-  if (codexVisible) window.Codex?.renderSummaryBar?.();
-});
 
   // first paint
   window.ensureSave(); updateFormUI(); renderBuffer(); setOutcome('—');

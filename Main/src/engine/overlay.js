@@ -313,7 +313,22 @@ async function showEndingOverlayById(endId){
   }, 5000);
 }
 
+// Simple image/title preview (used by Codex → Keyword "Preview" button)
+function showPreview({ title='', image='' } = {}){
+  window.overlay.enqueueOverlay({
+    title: title || 'Preview',
+    desc:  '',
+    image: image || 'assets/evolution_placeholder.png',
+    actions: [{ label:'Close', onClick: ()=> window.overlay.hideOverlay() }],
+    size: 'lg',
+    fit:  'contain'
+  });
+  requestAnimationFrame(()=> window.setCurtain?.(0.6));
+}
+
 window.overlay = Object.assign({}, window.overlay, {
   showEvolutionOverlay,
   showEndingOverlayById,
+  showPreview,
+  close: window.hideOverlay,   // alias used by settings.js reset
 });

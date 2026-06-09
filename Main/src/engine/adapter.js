@@ -16,13 +16,16 @@
         form: r.form || null,
         requires: req,
         toForm: r.toForm || null,
-        toEvo:  r.toEvo  || null,
+        // accept both `toEvo` and the legacy `toEvoOneOf` spelling
+        toEvo:  r.toEvo || r.toEvoOneOf || null,
         toEnd:  r.toEnd  || null,
         priority: Number(r.priority||0),
         repeatable: !!r.repeatable,
         window: r.window ? {
           drinks: r.window.drinks || req.length,
-          contiguous: !!r.window.contiguousOnly
+          contiguous: !!(r.window.contiguous || r.window.contiguousOnly),
+          // preserve lookback so guardDeny() can honour it
+          ...(typeof r.window.lookback === 'number' ? { lookback: r.window.lookback } : {})
         } : null,
         denyForms: Array.isArray(r.denyForms)? r.denyForms.slice() : [],
         denyKeywords: Array.isArray(r.denyKeywords)? r.denyKeywords.slice() : [],
