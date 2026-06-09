@@ -9,7 +9,9 @@ html,body{height:100%}
 body{margin:0;background:linear-gradient(180deg,var(--bg),#08090d 60%);color:var(--text);
   font:16px/1.5 system-ui,Segoe UI,Roboto,Arial}
 a{color:var(--accent)}
-.wrap{max-width:920px;margin:0 auto;padding:20px}
+/* single centered column — overrides the legacy 3-column grid from style.css
+   that squished the active tab panel (and clipped the Codex tab buttons). */
+.wrap{max-width:920px;margin:0 auto;padding:20px;display:block}
 
 /* Header */
 header.top{
@@ -71,7 +73,7 @@ main{padding:18px 0}
 .chip{display:inline-flex;gap:6px;align-items:center;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:#10131c;color:var(--muted)}
 
 /* Codex base (ใช้ต่อในแพ็กถัดไป) */
-.codex-tabs{display:flex;gap:8px;margin-bottom:10px}
+.codex-tabs{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .codex-btn{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#0e1118;color:var(--text);cursor:pointer}
 .codex-btn[aria-selected="true"]{background:#131827}
 .codex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
@@ -121,7 +123,7 @@ main{padding:18px 0}
 .kw-item.is-locked{ opacity:.6; cursor:not-allowed }
 .kw-item.is-locked .mini-tags{ visibility:hidden }  /* ซ่อนอีโมจิในแถวรายการ */
 .kw-selected.is-locked .kw-tags{ display:none }     /* ซ่อนแท็กบนกล่องรายละเอียด */
-.kw-selected .hint{ color:var(--muted); font-size:12px }.
+.kw-selected .hint{ color:var(--muted); font-size:12px }
 
 /* ===== Codex • Forms ===== */
 .forms-wrap { display: grid; gap: 12px; }
