@@ -175,6 +175,7 @@ function getByIdAny(id){
 
   const pageItems = p => formsAll.slice(p*PER_PAGE, p*PER_PAGE + PER_PAGE);
   const setSelected = (id,{resetEvo=true}={}) => { ST.selectedId=id; if(resetEvo) ST.evo=false; paint(); };
+  const goto        = d  => { ST.page = Math.min(totalPages-1, Math.max(0, ST.page+d)); paint(); };
 
   function paintViewer(host){
     const base = getByIdAny(ST.selectedId) || formsAll[0];
