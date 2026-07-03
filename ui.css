@@ -69,6 +69,7 @@ main{padding:18px 0}
 .log-box{height:220px;overflow:auto;border-radius:10px;border:1px solid var(--border);background:#0a0d14;padding:10px}
 .log-line{display:flex;gap:8px;align-items:flex-start}
 .log-time{color:var(--muted);font-size:12px;min-width:64px}
+.log-box .flavor{color:var(--muted);font-style:italic}
 .chip{display:inline-flex;gap:6px;align-items:center;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:#10131c;color:var(--muted)}
 
 /* Codex base (ใช้ต่อในแพ็กถัดไป) */

@@ -77,8 +77,14 @@
     // เผื่อใน HTML มี class="hidden"
     root.classList.remove('hidden');
     root.removeAttribute('hidden');
-    root.style.display = 'none';
-    root.style.zIndex  = '10001';
+    // ต้องตั้ง position:fixed ให้ element ที่มาจาก HTML ด้วย
+    // ไม่งั้นหน้าต่างจะไปต่อท้ายหน้า (หลุดนอกจอ) แทนที่จะลอยกลางจอ
+    Object.assign(root.style, {
+      position:'fixed', inset:'0',
+      display:'none',
+      alignItems:'center', justifyContent:'center',
+      zIndex:'10001'
+    });
   }
 })();
 
@@ -313,7 +319,25 @@ async function showEndingOverlayById(endId){
   }, 5000);
 }
 
+// ===== Preview (จาก Codex → Keywords: แสดงหน้าต่างภาพฟอร์มตามดาต้า preview ของ keyword) =====
+function showPreview({ title = 'Preview', desc = '', image = null } = {}){
+  window.closeBrewMiniOverlay?.();
+
+  window.overlay.enqueueOverlay({
+    title,
+    desc,
+    image: image || 'assets/evolution_placeholder.png',
+    actions: [{ label:'Close', onClick: ()=> window.overlay.hideOverlay() }],
+    size: 'lg',
+    fit:  'cover'
+  });
+
+  // ม่านมืดเบา ๆ ให้การ์ดเด่นขึ้น (hideOverlay จะ resetCurtain ให้เอง)
+  requestAnimationFrame(()=> window.setCurtain?.(0.6));
+}
+
 window.overlay = Object.assign({}, window.overlay, {
   showEvolutionOverlay,
   showEndingOverlayById,
+  showPreview,
 });

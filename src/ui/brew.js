@@ -90,6 +90,16 @@ window.KW_INDEX = (function buildKeywordIndex(){
     return (label||'').trim().split(/[\s\-]+/).filter(Boolean).map(s=>s.toLowerCase());
   }
 
+  // === Flavor text: map keyword id → flavor (จาก DATA_KEYWORDS) ===
+  const FLAVOR_BY_ID = (()=>{
+    const list = Array.isArray(window.DATA_KEYWORDS?.list) ? window.DATA_KEYWORDS.list
+               : Array.isArray(window.DATA_KEYWORDS) ? window.DATA_KEYWORDS
+               : [];
+    const map = Object.create(null);
+    for (const k of list){ if (k?.id && k.flavor) map[k.id] = k.flavor; }
+    return map;
+  })();
+
   function brew(){
   const input  = $('#labelInput');
   const result = $('#resultBox');
@@ -142,8 +152,12 @@ ensureDiscardButton();
   const hits = Array.isArray(window.__LAST_BREW_HITS__)? window.__LAST_BREW_HITS__ : [];
   if (!hits.length){ window.appendLog?.('Nothing to drink.'); return; }
 
-  // ส่งให้เอนจิน (ตามลำดับเดิมของคุณ)
-  for (const h of hits){ window.Chain.feed(h.id); }
+  // ส่งให้เอนจิน (ตามลำดับเดิมของคุณ) + แสดง flavor text ใน Log ตอนดื่มแต่ละคัพ
+  for (const h of hits){
+    const flavor = FLAVOR_BY_ID[h.id];
+    if (flavor) window.appendLog?.(`<span class="flavor">${flavor}</span>`);
+    window.Chain.feed(h.id);
+  }
 
   // สรุปเป็น ids ของคีย์เวิร์ด
   const ids = hits.map(h=>h.id).filter(Boolean);

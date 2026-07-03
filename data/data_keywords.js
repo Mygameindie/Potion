@@ -25,7 +25,7 @@ window.DATA_KEYWORDS = [
 { id:"tree",    name:"Tree", tag:["1","3","5"]},
 { id:"alien",    name:"Alien", tag:["1","3","5"]},
 { id:"octopus",    name:"Octopus", tag:["1","3","5"]},
-{ id:"fire",      name:"Fire",      synonyms:["flame"],        tag:["2","3","4","5"], preview:"burned"},
+{ id:"fire",      name:"Fire",      synonyms:["flame"],        tag:["2","3","4","5"], preview:"burned", flavor:"มีรสชาติไหม้ ขมแปลกๆ"},
 { id:"ice",    name:"Ice",   tag:["2","3","4","5"]},
 { id:"teeth",    name:"Teeth", tag:["1","5"]},
 { id:"eye",    name:"Eye", tag:["1","5"]},
