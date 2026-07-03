@@ -100,6 +100,27 @@ window.KW_INDEX = (function buildKeywordIndex(){
     return map;
   })();
 
+  // รอให้ผู้เล่นแตะกล่อง Log เพื่อดำเนินการต่อ (ใช้คั่นก่อนแปลงร่าง/ตาย)
+  function waitForLogTap(){
+    return new Promise(resolve=>{
+      const box = document.getElementById('log');
+      if (!box){ resolve(); return; }
+
+      const hint = document.createElement('div');
+      hint.className = 'log-continue';
+      hint.textContent = '▼ แตะเพื่อดำเนินการต่อ';
+      box.appendChild(hint);
+      box.scrollTop = box.scrollHeight;
+      box.classList.add('awaiting-tap');
+
+      box.addEventListener('click', function onTap(){
+        box.classList.remove('awaiting-tap');
+        hint.remove();
+        resolve();
+      }, { once:true });
+    });
+  }
+
   function brew(){
   const input  = $('#labelInput');
   const result = $('#resultBox');
@@ -148,14 +169,23 @@ window.__LAST_BREW_LABEL__ = (document.getElementById('labelInput')?.value || ''
 ensureDiscardButton();
 }
 
-  function drink(){
+  async function drink(){
   const hits = Array.isArray(window.__LAST_BREW_HITS__)? window.__LAST_BREW_HITS__ : [];
   if (!hits.length){ window.appendLog?.('Nothing to drink.'); return; }
 
+  // กันกดซ้ำระหว่างรอผู้เล่นแตะ Log
+  $('#drinkBtn').disabled = true;
+  document.getElementById('discardBtn')?.setAttribute('disabled', 'true');
+
   // ส่งให้เอนจิน (ตามลำดับเดิมของคุณ) + แสดง flavor text ใน Log ตอนดื่มแต่ละคัพ
+  // ถ้ามี flavor → แสดงก่อน แล้ว "หยุดรอ" ให้ผู้เล่นแตะกล่อง Log
+  // ค่อยดำเนินการต่อ (แปลงร่าง/ตาย ฯลฯ)
   for (const h of hits){
     const flavor = FLAVOR_BY_ID[h.id];
-    if (flavor) window.appendLog?.(`<span class="flavor">${flavor}</span>`);
+    if (flavor){
+      window.appendLog?.(`<span class="flavor">${flavor}</span>`);
+      await waitForLogTap();
+    }
     window.Chain.feed(h.id);
   }
 

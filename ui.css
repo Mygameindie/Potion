@@ -70,6 +70,9 @@ main{padding:18px 0}
 .log-line{display:flex;gap:8px;align-items:flex-start}
 .log-time{color:var(--muted);font-size:12px;min-width:64px}
 .log-box .flavor{color:var(--muted);font-style:italic}
+.log-box.awaiting-tap{cursor:pointer}
+.log-box .log-continue{color:var(--muted);font-size:12px;user-select:none;animation:logBlink 1.1s ease-in-out infinite}
+@keyframes logBlink{0%,100%{opacity:.25}50%{opacity:1}}
 .chip{display:inline-flex;gap:6px;align-items:center;font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);background:#10131c;color:var(--muted)}
 
 /* Codex base (ใช้ต่อในแพ็กถัดไป) */
