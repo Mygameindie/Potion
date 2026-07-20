@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data Editor — The Mysterious Cauldron of Brewing</title>
+  <link rel="stylesheet" href="ui.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="src/editor/editor.css" />
+</head>
+<body>
+  <header class="top" role="banner">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <h1>Data Editor</h1>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Editor Tabs">
+      <button class="tab-btn" role="tab" aria-selected="true"  data-etab="keywords">Keyword</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-etab="forms">Forms</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-etab="endings">Endings</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-etab="recipes">Recipe</button>
+    </nav>
+  </header>
+
+  <main class="wrap ed-wrap">
+    <div class="ed-toolbar card">
+      <div class="muted" id="edStatus">พร้อมใช้งาน</div>
+      <div class="ed-toolbar-actions">
+        <button class="btn" id="edExport">Generate File</button>
+        <button class="btn" id="edExportAll">Download all 4</button>
+        <button class="btn danger" id="edReset">Reset to game data</button>
+        <a class="btn" href="index.html">← Back to game</a>
+      </div>
+    </div>
+
+    <div class="ed-body">
+      <!-- LIST PANE -->
+      <section class="card ed-list-pane">
+        <div class="ed-list-head">
+          <input id="edSearch" type="text" placeholder="ค้นหา…" autocomplete="off" />
+          <button class="btn primary" id="edAdd">+ New</button>
+        </div>
+        <div id="edList" class="ed-list"></div>
+      </section>
+
+      <!-- FORM PANE -->
+      <section class="card ed-form-pane">
+        <div id="edFormHead" class="ed-form-head">
+          <p class="title" id="edFormTitle">เลือกหรือสร้างรายการ</p>
+          <div class="ed-form-head-actions" hidden id="edFormActions">
+            <button class="btn" id="edDuplicate">Duplicate</button>
+            <button class="btn danger" id="edDelete">Delete</button>
+          </div>
+        </div>
+        <form id="edForm" class="ed-form" autocomplete="off"></form>
+      </section>
+    </div>
+  </main>
+
+  <!-- Export modal -->
+  <div id="edModal" class="ed-modal" hidden>
+    <div class="ed-modal-card card">
+      <div class="ed-modal-head">
+        <p class="title" id="edModalTitle">Generated file</p>
+        <button class="btn" id="edModalClose">×</button>
+      </div>
+      <p class="muted" id="edModalHint"></p>
+      <textarea id="edModalText" spellcheck="false" readonly></textarea>
+      <div class="ed-modal-actions">
+        <button class="btn primary" id="edCopy">Copy</button>
+        <button class="btn" id="edDownload">Download .js</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- suggestion datalists (populated by editor.js) -->
+  <datalist id="dl-forms"></datalist>
+  <datalist id="dl-keywords"></datalist>
+  <datalist id="dl-endings"></datalist>
+
+  <!-- Seed with the real game data -->
+  <script defer src="data/data_keywords.js"></script>
+  <script defer src="data/data_forms.js"></script>
+  <script defer src="data/data_endings_new.js"></script>
+  <script defer src="data/data_recipes.js"></script>
+
+  <script defer src="src/editor/editor.js"></script>
+</body>
+</html>
