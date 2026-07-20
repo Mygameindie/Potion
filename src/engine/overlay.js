@@ -101,26 +101,6 @@ window.__typeText = window.__typeText || function(el, text, cps=30){
   });
 };
 
-window.__ensureGameOver = window.__ensureGameOver || function(){
-  let go = document.getElementById('gameOver');
-  if (!go){
-    go = document.createElement('div');
-    go.id = 'gameOver';
-    Object.assign(go.style, {
-      position:'fixed', inset:'0', display:'none',
-      alignItems:'center', justifyContent:'center',
-      background:'rgba(0,0,0,1)', color:'#fff', zIndex:'10002'
-    });
-    go.innerHTML = `
-      <div style="min-width:280px;max-width:820px;text-align:center;padding:18px 22px;">
-        <h1 id="goTitle" style="margin:0 6px 12px;font-size:42px;letter-spacing:2px;text-shadow:0 2px 24px rgba(0,0,0,.65);"></h1>
-        <p  id="goDesc"  style="margin:0 0 22px;color:#cfcfd6;opacity:.9"></p>
-        <button id="goContinue" class="btn" style="padding:10px 18px;font-weight:700;border-radius:10px">CONTINUE</button>
-      </div>`;
-    document.body.appendChild(go);
-  }
-  return go;
-};
 
 // ===== Core overlay API (new version only) =====
 (function(){
@@ -177,15 +157,69 @@ card.addEventListener('animationend', ()=>card.classList.remove('anim-in'), {onc
   root.style.zIndex     = '10001';
 }
 
+  // ฉากเต็มจอ (เฟดดำ → ภาพข้างบนกลาง → ข้อความ → ปุ่ม)
+  // คืน element ต่าง ๆ ให้ผู้เรียกไปเติมข้อความ/ผูกปุ่มเอง
+  function showSceneOverlay({title='', desc='', image='', actions=[]}){
+    clearNode(root);
+
+    const scene = document.createElement('div');
+    scene.className = 'scene-full';
+
+    const img = document.createElement('div');
+    img.className = 'scene-img';
+    if (image) img.style.backgroundImage = `url('${image}')`;
+
+    const h = document.createElement('h1');
+    h.textContent = title;
+
+    const p = document.createElement('p');
+    p.textContent = desc;
+
+    const act = document.createElement('div');
+    act.className = 'ov-actions';
+    const buttons = (actions||[]).map(a=>{
+      const b = document.createElement('button');
+      b.className = a.className || 'btn';
+      b.textContent = a.label || 'OK';
+      b.addEventListener('click', ()=> a.onClick && a.onClick(b));
+      act.appendChild(b);
+      return b;
+    });
+
+    scene.append(img, h, p, act);
+    root.appendChild(scene);
+
+    root.classList.remove('hidden');
+    root.removeAttribute('hidden');
+    root.style.display    = 'flex';
+    root.style.visibility = 'visible';
+    root.style.opacity    = '1';
+    root.style.zIndex     = '10001';
+
+    requestAnimationFrame(()=> scene.classList.add('show'));
+    return { scene, imgEl:img, titleEl:h, descEl:p, buttons };
+  }
+
   function hideOverlay(){
   const card = root.firstChild;
-  if (card) {
+  let done = false;
+  if (card && card.classList.contains('scene-full')) {
+    // ฉากเต็มจอ: เฟดออกด้วย transition ของ opacity
+    if (!card.classList.contains('show')) { finalize(); }
+    else {
+      card.classList.remove('show');
+      card.addEventListener('transitionend', finalize, {once:true});
+      setTimeout(finalize, 800); // กัน transitionend ไม่ยิง
+    }
+  } else if (card) {
     card.classList.add('anim-out');
     card.addEventListener('animationend', finalize, {once:true});
   } else {
     finalize();
   }
   function finalize(){
+    if (done) return;
+    done = true;
     root.setAttribute('hidden','');
     root.style.display='none';
     root.style.visibility='hidden';
@@ -196,52 +230,51 @@ card.addEventListener('animationend', ()=>card.classList.remove('anim-in'), {onc
 
   window.overlay = Object.assign({}, window.overlay, {
     enqueueOverlay,
+    showSceneOverlay,
     hideOverlay,
   });
   window.hideOverlay = hideOverlay; // เผื่อเรียกตรง
 })();
 
-// ===== Evolution (fade-in, Devolve only) =====
+// ===== ปิดฉากเต็มจอ: ฉากจางออก → ม่านจางออก → เก็บกวาด =====
+function __sceneWait(ms){ return new Promise(r=>setTimeout(r, ms)); }
+async function __closeScene(){
+  const scene = document.querySelector('#overlay .scene-full');
+  if (scene) scene.classList.remove('show');
+  await __sceneWait(650);
+  await window.__fadeFromBlack?.(1000);
+  window.overlay.hideOverlay();
+}
+
+// ===== Evolution (เฟดดำ → ภาพร่างอีโวข้างบนกลาง → "Evolution Complete" → ปุ่ม Devolve) =====
 async function showEvolutionOverlay(newId, prevId){
   // ปิดมินิโอเวอร์เลย์ (ถ้าค้าง)
   window.closeBrewMiniOverlay?.();
 
-  await window.__fadeToBlack?.(1000);              // มืดเข้า
-  const f = (window.DATA_FORMS && window.DATA_FORMS[newId]) || null;
+  await window.__fadeToBlack?.(1000);              // เฟดดำ
+  const f    = (window.DATA_FORMS && window.DATA_FORMS[newId])  || null;
+  const prev = (window.DATA_FORMS && window.DATA_FORMS[prevId]) || null;
 
-
-window.overlay.enqueueOverlay({
-  title: `Evolution → ${f?.name || newId}`,
-  desc:  `วิวัฒนาการสำเร็จ (จาก ${window.DATA_FORMS?.[prevId]?.name||prevId})`,
-  image: f?.image || 'assets/evolution_placeholder.png',
-  actions: [{ label:'Devolve', onClick: async ()=>{
-          const S = window.ensureSave?.(); 
-          if (S){ S.form.id = prevId; window.saveNow?.(); }
-          try{
-            window.Chain?.setForm?.(prevId);
-            window.Chain?.resetBuffer && window.Chain.resetBuffer();
-          }catch(_){}
-          window.updateFormUI?.();
-          window.appendLog?.(`Devolve → ${prevId}`);
-
-          await window.__fadeFromBlack?.(1000);     // สว่างกลับ
-          window.overlay.hideOverlay();             // จะ resetCurtain ให้ด้วย
-        } 
-      }
-    ],
-  size: 'lg',         // ⬅ ใหญ่
-  fit:  'cover'       // หรือ 'contain' ถ้าภาพตั้ง
-});
-
-  // ให้พื้นหลังมืดพอดี (ไม่กลืนการ์ด)
-  requestAnimationFrame(()=>{
-  window.setCurtain?.(0.75);
-  document.getElementById('fadeCurtain')?.classList.add('pulse');
-  setTimeout(()=>document.getElementById('fadeCurtain')?.classList.remove('pulse'), 2000);
-});
+  window.overlay.showSceneOverlay({
+    title: 'Evolution Complete',
+    desc:  `${prev?.name || prevId} → ${f?.name || newId}`,
+    image: f?.image || 'assets/evolution_placeholder.png',
+    actions: [{ label:'Devolve', onClick: async (btn)=>{
+      btn.disabled = true;
+      const S = window.ensureSave?.();
+      if (S){ S.form.id = prevId; window.saveNow?.(); }
+      try{
+        window.Chain?.setForm?.(prevId);
+        window.Chain?.resetBuffer && window.Chain.resetBuffer();
+      }catch(_){}
+      window.updateFormUI?.();
+      window.appendLog?.(`Devolve → ${prevId}`);
+      await __closeScene();
+    }}]
+  });
 }
 
-// ===== Endings (fade-in → overlay 5s → GameOver → Continue=reborn) =====
+// ===== Endings (เฟดดำ → ภาพฉากจบข้างบนกลาง → พิมพ์สตริงฉากจบ → ปุ่ม Reborn) =====
 async function showEndingOverlayById(endId){
   window.closeBrewMiniOverlay?.();
 
@@ -252,47 +285,12 @@ async function showEndingOverlayById(endId){
 
   await window.__fadeToBlack?.(1000);
 
-  window.overlay.enqueueOverlay({
-    title: overlay.title || e?.name || 'Ending',
-    desc:  overlay.desc  || '',
+  const titleText = (overlay.title || e?.name || 'GAME OVER!').toUpperCase();
+  const descText  = overlay.desc || '';
+
+  const ui = window.overlay.showSceneOverlay({
     image: overlay.image || 'assets/ending_default.png',
-    actions: [],
-    size: 'lg',
-    fit:  'cover'
-  });
-
-  requestAnimationFrame(()=>{
-    window.setCurtain?.(0.85);
-    // ⬇️ ใช้ overlay root จาก DOM แทน root ที่ไม่มีในสโคปนี้
-    document.getElementById('overlay')
-      ?.querySelector('.ov-img')
-      ?.classList.add('kenburns');
-  });
-
-  clearTimeout(window.__endingTO);
-  window.__endingTO = setTimeout(async ()=>{
-    window.overlay.hideOverlay();
-
-    const go = window.__ensureGameOver();
-    go.style.display = 'flex';
-    go.style.opacity = '0';
-    go.style.transition = 'opacity 350ms ease';
-    requestAnimationFrame(()=> go.style.opacity = '1');
-
-    const titleText = (overlay.title || e?.name || 'GAME OVER!').toUpperCase();
-    const descText  = overlay.desc || '';
-    const h1 = go.querySelector('#goTitle');
-    const p  = go.querySelector('#goDesc');
-
-    await window.__typeText(h1, titleText, 40);
-    if (descText) await window.__typeText(p, descText, 45);
-
-    const btn = go.querySelector('#goContinue');
-    btn.classList.add('appear');
-    setTimeout(()=>btn.classList.remove('appear'), 600);
-    btn.disabled = false;
-
-    btn.onclick = async ()=>{
+    actions: [{ label:'Reborn', onClick: async (btn)=>{
       btn.disabled = true;
 
       const S = window.ensureSave?.();
@@ -309,14 +307,23 @@ async function showEndingOverlayById(endId){
         if (!f || !f.evoOnly) window.markFormSeen?.(reborn);
       }catch(_){}
 
-      // ⬇️ เฟดออกจริง ๆ
-      go.style.opacity = '0';
-      setTimeout(()=>{ go.style.display = 'none'; }, 350);
-      await window.__fadeFromBlack?.(1000);
-      window.resetCurtain?.();
+      await __closeScene();
       window.closeBrewMiniOverlay?.();
-    };
-  }, 5000);
+    }}]
+  });
+
+  // ซ่อนปุ่มไว้ก่อน พิมพ์สตริงฉากจบเสร็จค่อยโชว์
+  const btn = ui.buttons[0];
+  btn.style.visibility = 'hidden';
+  ui.imgEl.classList.add('kenburns');
+
+  await __sceneWait(650);                              // รอฉากเฟดเข้า
+  await window.__typeText(ui.titleEl, titleText, 40);
+  if (descText) await window.__typeText(ui.descEl, descText, 45);
+
+  btn.style.visibility = 'visible';
+  btn.classList.add('appear');
+  setTimeout(()=>btn.classList.remove('appear'), 600);
 }
 
 // ===== Preview (จาก Codex → Keywords: แสดงหน้าต่างภาพฟอร์มตามดาต้า preview ของ keyword) =====

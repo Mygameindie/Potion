@@ -35,6 +35,7 @@ button, input, select, textarea { font: inherit; }
 /* ===== Endings: Ken Burns on the top image ===== */
 @keyframes kenburns { from{transform:scale(1)} to{transform:scale(1.08)} }
 .overlay-card .ov-img.kenburns { animation: kenburns 5s ease forwards; }
+.scene-full .scene-img.kenburns { animation: kenburns 6s ease forwards; }
 
 /* ===== Evolution: short curtain pulse ===== */
 @keyframes pulseDark { 0%,100%{opacity:.75} 50%{opacity:.9} }
@@ -55,3 +56,4 @@ button, input, select, textarea { font: inherit; }
 /* ===== Game Over: button attention pop ===== */
 @keyframes btnAttention { 0%{transform:scale(1)} 30%{transform:scale(1.06)} 100%{transform:scale(1)} }
 #gameOver #goContinue.appear { animation: btnAttention .45s ease .1s both; }
+.scene-full .btn.appear { animation: btnAttention .45s ease .1s both; }
