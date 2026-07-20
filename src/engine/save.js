@@ -27,6 +27,7 @@
         endingsDiscovered:    num(S.counters?.endingsDiscovered, 0),
         evolutionsDiscovered: num(S.counters?.evolutionsDiscovered, 0),
       },
+      settings: (S.settings && typeof S.settings === 'object') ? { ...S.settings } : {},
     };
 
     // First-boot guarantee: mark human discovered exactly once
@@ -53,6 +54,7 @@
         endingsDiscovered:    num(S.counters?.endingsDiscovered, 0),
         evolutionsDiscovered: num(S.counters?.evolutionsDiscovered, 0),
       },
+      settings: { ...(S.settings || {}) },
     };
     return payload;
   }

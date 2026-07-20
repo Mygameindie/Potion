@@ -127,7 +127,13 @@ window.KW_INDEX = (function buildKeywordIndex(){
   const drink  = $('#drinkBtn');
 
   // ดึง "คำดิบ" ที่ผู้เล่นพิมพ์ (รักษาเคสและสะกดตามจริง)
-  const rawTokens = (input.value || '').trim().split(/[\s\-]+/).filter(Boolean);
+  // ถ้าช่องว่าง → ใช้ Default Brew Word จาก Settings; ถ้าไม่ได้ตั้งไว้ → human (ร่างเริ่มต้น)
+  let raw = (input.value || '').trim();
+  if (!raw){
+    raw = String(window.getSetting?.('defaultWord') || '').trim() || 'human';
+    input.value = raw;   // ให้ผู้เล่นเห็นคำที่ใช้จริง
+  }
+  const rawTokens = raw.split(/[\s\-]+/).filter(Boolean);
   if (!rawTokens.length){
     result.textContent = 'ใส่อะไรสักอย่างก่อน…';
     return;

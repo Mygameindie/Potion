@@ -63,46 +63,53 @@
 
   <!-- Settings -->
   <section id="tab-settings" class="panel" role="tabpanel" hidden>
-  <div class="card danger">
-    <p class="title">Danger Zone</p>
-    <button class="btn danger" id="btnReset">Hard Reset</button>
-  </div>
+  <div class="settings-grid">
 
-  <div class="card">
-    <p class="title">Display & Accessibility</p>
-    <label class="row"><input type="checkbox" id="setCompact"> Compact UI</label>
-    <label class="row"><input type="checkbox" id="setContrast"> High Contrast</label>
-    <label class="row"><input type="checkbox" id="setInstant"> Instant Overlays</label>
-    <label class="row"><input type="checkbox" id="setAutoScroll"> Auto-scroll Log</label>
-  </div>
+    <div class="card">
+      <p class="title">Brew Defaults</p>
+      <label for="setDefaultWord">Default Brew Word</label>
+      <input id="setDefaultWord" type="text" placeholder="human (ร่างเริ่มต้น)" autocomplete="off">
+      <p class="muted hint">
+        ถ้าช่อง Brew ว่างอยู่ เมื่อกด Brew จะใช้คำนี้อัตโนมัติ —
+        ถ้าไม่ใส่อะไรเลย จะใช้ <b>human</b> (ร่างเริ่มต้น)
+      </p>
+    </div>
 
-  <div class="card">
-    <p class="title">Credits</p>
-    <div class="muted">Potion of Everything — UI v1</div>
-  </div>
-  <!-- STATE -->
-    <section class="card">
-      <h2>State</h2>
-      <div>Buffer: <span id="stBuffer" class="mono">—</span></div>
-      <div>Outcome: <span id="stOutcome">—</span></div>
-      <div class="btns">
-        <button id="btnClearBuf">Clear Buffer</button>
+    <div class="card">
+      <p class="title">Display & Accessibility</p>
+      <label class="row"><input type="checkbox" id="setCompact"> Compact UI</label>
+      <label class="row"><input type="checkbox" id="setContrast"> High Contrast</label>
+      <label class="row"><input type="checkbox" id="setInstant"> Instant Overlays</label>
+      <label class="row"><input type="checkbox" id="setAutoScroll"> Auto-scroll Log</label>
+    </div>
+
+    <div class="card">
+      <p class="title">State</p>
+      <div class="state-line">Buffer: <span id="stBuffer" class="mono">—</span></div>
+      <div class="state-line">Outcome: <span id="stOutcome">—</span></div>
+      <div class="btn-row">
+        <button class="btn" id="btnClearBuf">Clear Buffer</button>
       </div>
-    </section>
-    
-    <!-- === Brew Defaults === -->
-<div class="card">
-  <p class="title">Brew Defaults</p>
+    </div>
 
-  <div class="row">
-    <label for="setDefaultWord">Default Brew Word</label><br>
-    <input id="setDefaultWord" type="text" placeholder="เช่น flame frost" style="width:100%;max-width:420px">
-    <p class="muted" style="margin:6px 0 0">
-      ถ้าช่อง Brew ว่างอยู่ เมื่อกด Brew จะใช้คำนี้อัตโนมัติ (ปุ่มลัด “Brew default” ก็อ่านจากค่านี้)
-    </p>
+    <div class="card danger">
+      <p class="title">Danger Zone</p>
+      <div class="btn-row">
+        <button class="btn" id="btnSoftReset">Soft Reset</button>
+        <button class="btn danger" id="btnReset">Hard Reset</button>
+      </div>
+      <p class="muted hint">
+        Soft Reset ล้างความคืบหน้า (เก็บ Settings ไว้) ·
+        Hard Reset ล้างข้อมูลทั้งหมดรวม Settings
+      </p>
+    </div>
+
+    <div class="card">
+      <p class="title">Credits</p>
+      <div class="muted">Potion of Everything — UI v1</div>
+    </div>
+
   </div>
-</div>
-
 </section>
 
   <!-- Overlay -->

@@ -49,13 +49,13 @@
 })();
 
 (function(){
-  // จับคลิกทั้งหน้าให้ชัวร์
+  // จับคลิกทั้งหน้าให้ชัวร์ (มีปุ่มแยก Soft/Hard เพราะมือถือกด Shift ไม่ได้)
   document.addEventListener('click', function(e){
-    const btn = e.target.closest?.('#btnReset');
+    const btn = e.target.closest?.('#btnReset, #btnSoftReset');
     if (!btn) return;
     e.preventDefault();
 
-    const hard = !!(e.shiftKey || e.altKey); // กด Shift/Alt ขณะคลิก = Hard Reset
+    const hard = btn.id === 'btnReset';
     const msg  = hard
       ? 'Hard Reset: ล้างข้อมูลทั้งหมด (รวม Settings) — แน่ใจหรือไม่?'
       : 'Soft Reset: ล้างความคืบหน้า (เก็บ Settings) — แน่ใจหรือไม่?';
