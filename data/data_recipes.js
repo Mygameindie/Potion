@@ -1,5 +1,14 @@
 // v4.2 unified recipes (anyOf/group removed; linear routes)
 window.DATA_RECIPES = [
+{ id:"human", requires:[{cup:"human"}], toForm:"human", priority:100 },
+{ id:"evohuman", form:"human", requires:[{cup:"evolution"}], toEvo:"evo_human" },
+
+{ id:"demon", requires:[{cup:"hell"}], toForm:"demon" },
+{ id:"evodemon", form:"demon", requires:[{cup:"evolution"}], toEvo:"evo_demon" },
+
+{ id:"angel", requires:[{cup:"heaven"}], toForm:"angel" },
+{ id:"evoangel", form:"angel", requires:[{cup:"evolution"}], toEvo:"evo_angel" },
+
   { id:"burned", requires:[{cup:"fire"}], toForm:"burned", priority:5, denyForms:["burned"]},
   { id:"ghost", requires:[{cup:"ghost"},{cup:"death"}], toForm:"ghost", priority:100},
   { id:"tree", requires:[{cup:"tree"}], toForm:"tree" },
@@ -19,7 +28,6 @@ window.DATA_RECIPES = [
   { id:"nulltaion", requires:[{cup:"potion"},{cup:"potion"},{cup:"potion"},{cup:"potion"},{cup:"potion"},{cup:"potion"},{cup:"potion"},{cup:"potion"}], window:{drinks:8,contiguous:true}, toForm:"nulltation", priority:150 },
   { id:"vampire", requires:[{cup:"blood"},{cup:"blood"}], window:{drinks:2,contiguous:true}, toForm:"vampire", priority:100,denyForms:["vampire"] },
   { id:"vampirelord", form:"vampire", requires:[{cup:"blood"},{cup:"blood"},{cup:"blood"},{cup:"blood"}], window:{drinks:4,contiguous:true}, toForm:"vampirelord", priority:150 },
-  { id:"human", requires:[{cup:"human"}], toForm:"human", priority:100 },
   { id:"cow", requires:[{cup:"cow"}], toForm:"cow", priority:100 },
   { id:"void_elem", requires:[{cup:"immortality"},{cup:"void"}], toForm:"void_elemental", priority:100 },
   { id:"pressurevoid", requires:[{cup:"immortality"},{cup:"pressure"}], window:{drinks:2,contiguous:true}, toForm:"domius" },

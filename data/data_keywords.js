@@ -8,10 +8,10 @@ const KW_TAGS = {
 };
 
 window.DATA_KEYWORDS = [
-{ id:"human",    name:"Human",    synonyms:["default","people"], tag:["1","2","3","4","5"]},
+{ id:"human",    name:"Human",    synonyms:["default","people"], tag:["1","2","3","4","5"], flavor:"ทดสอบๆ"},
+{ id:"hell",    name:"Hell",    synonyms:["demon","evil","devil"], tag:["1","3","5"], flavor:"บางที่ศัตรู อาจจะไม่ใช่มนุษย์ ปีศาจก็เช่นกัน"},
 { id:"abyss",    name:"Abyss",  tag:["1","5"]},
 { id:"heaven",    name:"Heaven", synonyms:["angel","god","jesus"],  tag:["1","3","5"]},
-{ id:"hell",    name:"Hell", synonyms:["demon","devil"],  tag:["1","3","5"]},
 { id:"disease",    name:"Disease", synonyms:["cancer","plague"],  tag:["1","3","5"]},
 { id:"ghost",    name:"Ghost", tag:["1","3","5"]},
 { id:"blood",    name:"Blood", tag:["1","3","5"]},
